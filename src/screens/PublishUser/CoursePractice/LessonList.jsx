@@ -1,7 +1,5 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import axios from "axios";
 
 // const lessonData = [
 //   {
@@ -24,7 +22,13 @@ import axios from "axios";
 //   }
 // ];
 
-function LessonCard({ videoKey, courseSlug, videoStatusList,markVideoAsCompleted, ...lesson  }) {
+function LessonCard({
+  videoKey,
+  courseSlug,
+  videoStatusList,
+  markVideoAsCompleted,
+  ...lesson
+}) {
   return (
     <div className="flex overflow-hidden flex-col w-full text-xl max-lg:text-[16px] leading-none">
       <div className="flex gap-3 items-center px-3 py-4 w-full font-medium leading-5 text-white bg-neutral-900 min-h-[60px]">
@@ -49,7 +53,7 @@ function LessonCard({ videoKey, courseSlug, videoStatusList,markVideoAsCompleted
                 <div className="gap-2.5 self-stretch my-auto">
                   {topic.VideoName}
                 </div>
-                {videoStatusList[topic._id] === 1  ? (
+                {videoStatusList[topic._id] === 1 ? (
                   <img
                     loading="lazy"
                     src="/Icon/done.svg"
@@ -85,7 +89,12 @@ function LessonCard({ videoKey, courseSlug, videoStatusList,markVideoAsCompleted
   );
 }
 
-function LessonList({course, videoKey, videoStatusList, markVideoAsCompleted}) {
+function LessonList({
+  course,
+  videoKey,
+  videoStatusList,
+  markVideoAsCompleted,
+}) {
   const lessons = Object.values(course.lesson);
   return (
     <div className="flex flex-col min-w-[200px]">
@@ -93,12 +102,12 @@ function LessonList({course, videoKey, videoStatusList, markVideoAsCompleted}) {
         lessons.length > 0 &&
         lessons.map((lesson, index) => (
           <LessonCard
-          videoKey={videoKey}
-          courseSlug={course?.CourseSlug}
-          videoStatusList={videoStatusList}
-          markVideoAsCompleted={markVideoAsCompleted}
-          {...lesson}
-          key={index}
+            videoKey={videoKey}
+            courseSlug={course?.CourseSlug}
+            videoStatusList={videoStatusList}
+            markVideoAsCompleted={markVideoAsCompleted}
+            {...lesson}
+            key={index}
           />
         ))}
     </div>

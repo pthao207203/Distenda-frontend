@@ -5,7 +5,6 @@ import CourseSection from "./CourseSection";
 import CourseNavigation from "./CourseNavigation";
 import InstructorProfile from "./InstructorProfile";
 import CourseStats from "./CourseStats";
-import LearningOutcomes from "./LearningOutcomes";
 import CourseLessons from "./CourseLessons";
 import CourseReviews from "./CourseReviews";
 import CourseCard from "./CourseCard";
