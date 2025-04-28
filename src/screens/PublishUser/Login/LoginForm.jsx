@@ -6,7 +6,7 @@ import FacebookLoginButton from "./FacebookLoginButton.jsx";
 
 import { loginController } from "../../../controllers/auth.controller.js";
 
-function LoginForm({ onForgotPassword }) {
+function LoginForm({ setLoading, onForgotPassword }) {
   const [formData, setFormData] = useState({
     UserEmail: "",
     UserPassword: "",
@@ -18,6 +18,7 @@ function LoginForm({ onForgotPassword }) {
   //Xử lý login with Google
   const handleGoogleLoginSuccess = async (response) => {
     try {
+      setLoading(true);
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/auth/login/google`,
         { token: response.credential },
@@ -29,6 +30,7 @@ function LoginForm({ onForgotPassword }) {
       } else {
         setError(res.data.message);
       }
+      setLoading(false);
     } catch (err) {
       setError("Lỗi đăng nhập với Google");
     }
@@ -42,6 +44,7 @@ function LoginForm({ onForgotPassword }) {
   //Xử lý đăng nhập Facebook
   const handleFacebookLoginSuccess = async (fbResponse) => {
     try {
+      setLoading(true);
       console.log({
         accessToken: fbResponse.accessToken,
         userID: fbResponse.userID,
@@ -57,6 +60,7 @@ function LoginForm({ onForgotPassword }) {
       } else {
         setError(res.data.message);
       }
+      setLoading(false);
     } catch (err) {
       setError("Lỗi đăng nhập với Facebook");
     }
@@ -73,27 +77,14 @@ function LoginForm({ onForgotPassword }) {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     console.log("Form data:", formData);
     setError(null);
     setSuccess(null);
-    try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
-        formData
-      );
-      if (res.data.code === 200) {
-        localStorage.setItem("user_role", "user");
-        navigate("/");
-      } else {
-        setError(res.data.message);
-      }
-    } catch (err) {
-      setError("Lỗi kết nối máy chủ");
-    }
-
     // Gửi dữ liệu tới server
     loginController(formData, setSuccess, setError, navigate);
+    setLoading(false);
   };
 
   return (

@@ -28,6 +28,18 @@ function CourseCard(course) {
         </div>
 
         <div className="flex gap-5 items-start mt-[0.75rem] w-full">
+          <div className="flex shrink-0">Giá</div>
+          <div className="flex-1 shrink-0 text-right ">
+            {course.CoursePrice === 0
+              ? "Miễn phí"
+              : (
+                  (course.CoursePrice * (100 - course.CourseDiscount)) /
+                  100
+                ).toLocaleString("vi-VN")}
+          </div>
+        </div>
+
+        <div className="flex gap-5 items-start mt-[0.75rem] w-full">
           <div className="flex shrink-0">Thời gian</div>
           <div className="flex-1 shrink-0 text-right ">
             {course.CourseDuration === 0
@@ -44,7 +56,7 @@ function CourseCard(course) {
         <div className="flex items-start mt-[0.75rem] w-full">
           <div className="flex shrink-0 w-auto">Giảng viên</div>
           <div className="flex-1 text-right">
-            {course.intructor ? course.intructor.AdminFullName : "Không có"}
+            {course.intructor ? course.intructor : "Không có"}
           </div>
         </div>
       </div>

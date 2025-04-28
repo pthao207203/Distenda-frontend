@@ -35,7 +35,14 @@ export default function CourseStats(course) {
     { label: "Số lượng bài học", value: `${countVideo} bài` },
     { label: "Số lượng bài tập", value: `${countExer} bài` },
     { label: "Yêu cầu đầu vào", value: course.CourseRequire },
-    { label: "Thời gian học", value: `${course.CourseDuration} tháng` },
+    {
+      label: "Thời gian học",
+      value: `${
+        course.CourseDuration === 0
+          ? "Không giới hạn"
+          : course.CourseDuration + " tháng"
+      }`,
+    },
   ];
 
   return (

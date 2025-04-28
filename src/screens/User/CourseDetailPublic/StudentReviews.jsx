@@ -49,29 +49,33 @@ function TestimonialSection(reviewData) {
   const review = Object.values(reviewData);
   console.log("review", review);
   return (
-    <Container
-      fluid
-      className=" bg-none text-left items-start justify-start ml-0"
-    >
-      <div className="items-start mb-5">
-        <h2 className="flex gap-3 items-start py-2 text-[1.25rem] max-lg:text-[16px] font-medium leading-none text-white max-w-[1333px] max-md:max-w-full">
-          Nhận xét của học viên
-        </h2>
-      </div>
-      <Row className="pb-5 flex flex-wrap w-full ">
-        {review.map((testimonial, index) => (
-          <Col
-            key={index}
-            lg={6}
-            md={6}
-            sm={12}
-            className="mb-[8px] text-[1.25rem] max-lg:text-[14px]"
-          >
-            <TestimonialCard {...testimonial} />
-          </Col>
-        ))}
-      </Row>
-    </Container>
+    <>
+      {review.length !== 0 && (
+        <Container
+          fluid
+          className=" bg-none text-left items-start justify-start ml-0"
+        >
+          <div className="items-start mb-5">
+            <h2 className="flex gap-3 items-start py-2 text-[1.25rem] max-lg:text-[16px] font-medium leading-none text-white max-w-[1333px] max-md:max-w-full">
+              Nhận xét của học viên
+            </h2>
+          </div>
+          <Row className="pb-5 flex flex-wrap w-full ">
+            {review.map((testimonial, index) => (
+              <Col
+                key={index}
+                lg={6}
+                md={6}
+                sm={12}
+                className="mb-[8px] text-[1.25rem] max-lg:text-[14px]"
+              >
+                <TestimonialCard {...testimonial} />
+              </Col>
+            ))}
+          </Row>
+        </Container>
+      )}
+    </>
   );
 }
 

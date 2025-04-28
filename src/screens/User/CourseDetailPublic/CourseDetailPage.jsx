@@ -11,8 +11,9 @@ import {
   coursePayController,
 } from "../../../controllers/course.controller";
 import { useOutletContext } from "react-router-dom";
-import Loading from "../../../components/Loading";
 import { addNotification } from "../../../services/notification.service";
+import { Helmet } from "react-helmet";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 export default function CourseDetailPage() {
   const { headerHeight } = useOutletContext(); // Nhận giá trị từ context
@@ -137,57 +138,61 @@ export default function CourseDetailPage() {
     }
   }, [CourseSlug]);
 
-  if (loading) {
-    return <Loading />;
-  }
   console.log("course => ", data);
 
   return (
-    <div className="flex flex-col relative w-full h-full overflow-y-auto">
-      {/* <PageNav {...data} /> */}
-      {/* CourseContent nhận hàm handleOpenPayment */}
-      <CourseContent
-        {...data}
-        headerHeight={headerHeight}
-        onRegister={
-          isAuthenticated ? handleOpenPayment : handleOpenLoginRequest
-        }
-      />
+    <>
+      <Helmet>
+        <title>{data ? data.CourseName : "Chi tiết khoá học"}</title>
+      </Helmet>
 
-      {/* Nếu đã đăng nhập, hiển thị Payment overlay */}
-      {isAuthenticated && isPaymentVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
-          <CheckoutPage
-            {...data}
-            handleOpenBank={handleOpenBank}
-            onClose={handleClosePayment}
-          />
-        </div>
-      )}
+      {loading && <LoadingPopup />}
+      <div className="flex flex-col relative w-full h-full overflow-y-auto">
+        {/* <PageNav {...data} /> */}
+        {/* CourseContent nhận hàm handleOpenPayment */}
+        <CourseContent
+          {...data}
+          headerHeight={headerHeight}
+          onRegister={
+            isAuthenticated ? handleOpenPayment : handleOpenLoginRequest
+          }
+        />
 
-      {/* Nếu có Bank overlay */}
-      {isBankVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
-          <Bank handleConfirm={handleOpenThank} onClose={handleCloseBank} />
-        </div>
-      )}
+        {/* Nếu đã đăng nhập, hiển thị Payment overlay */}
+        {isAuthenticated && isPaymentVisible && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
+            <CheckoutPage
+              {...data}
+              handleOpenBank={handleOpenBank}
+              onClose={handleClosePayment}
+            />
+          </div>
+        )}
 
-      {/* Nếu có ThankYou overlay */}
-      {isThankVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
-          <ThankYouPage
-            onClose={handleCloseThank}
-            content="Cảm ơn bạn! Thông tin thanh toán sẽ được kiểm tra và thông báo trong vòng 24h tới!"
-          />
-        </div>
-      )}
+        {/* Nếu có Bank overlay */}
+        {isBankVisible && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
+            <Bank handleConfirm={handleOpenThank} onClose={handleCloseBank} />
+          </div>
+        )}
 
-      {/* Nếu chưa đăng nhập, hiển thị LoginRequest overlay */}
-      {!isAuthenticated && isLoginRequestVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
-          <LoginRequest onClose={handleCloseLoginRequest} />
-        </div>
-      )}
-    </div>
+        {/* Nếu có ThankYou overlay */}
+        {isThankVisible && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
+            <ThankYouPage
+              onClose={handleCloseThank}
+              content="Cảm ơn bạn! Thông tin thanh toán sẽ được kiểm tra và thông báo trong vòng 24h tới!"
+            />
+          </div>
+        )}
+
+        {/* Nếu chưa đăng nhập, hiển thị LoginRequest overlay */}
+        {!isAuthenticated && isLoginRequestVisible && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
+            <LoginRequest onClose={handleCloseLoginRequest} />
+          </div>
+        )}
+      </div>
+    </>
   );
 }

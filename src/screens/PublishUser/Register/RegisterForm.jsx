@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoginButton from "../Login/LoginButton.jsx";
 import FacebookLoginButton from "../Login/FacebookLoginButton.jsx";
 
 import { registerController } from "../../../controllers/auth.controller.js";
 
-function RegisterForm() {
+function RegisterForm({ setLoading }) {
   const [formData, setFormData] = useState({
     UserFullName: "",
     UserEmail: "",
@@ -17,20 +17,22 @@ function RegisterForm() {
   const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
 
-   //Xử lý login with Google
-   const handleGoogleLoginSuccess = async (response) => {
+  //Xử lý login with Google
+  const handleGoogleLoginSuccess = async (response) => {
     try {
+      setLoading(true);
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/auth/login/google`,
         { token: response.credential },
         { withCredentials: true }
-      );      
+      );
       if (res.data.code === 200) {
         localStorage.setItem("user_token", res.data.user.UserToken);
         navigate("/");
       } else {
         setError(res.data.message);
       }
+      setLoading(false);
     } catch (err) {
       setError("Lỗi đăng nhập với Google");
     }
@@ -39,6 +41,7 @@ function RegisterForm() {
   //Xử lý đăng nhập Facebook
   const handleFacebookLoginSuccess = async (fbResponse) => {
     try {
+      setLoading(true);
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/auth/login/facebook`,
         { accessToken: fbResponse.accessToken, userID: fbResponse.userID },
@@ -50,6 +53,7 @@ function RegisterForm() {
       } else {
         setError(res.data.message);
       }
+      setLoading(false);
     } catch (err) {
       setError("Lỗi đăng nhập với Facebook");
     }
@@ -71,6 +75,7 @@ function RegisterForm() {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     console.log("Form data:", formData);
     setError(null);
@@ -81,9 +86,9 @@ function RegisterForm() {
       alert("Mật khẩu không khớp!");
       return;
     }
-
     // Gửi dữ liệu tới server
     registerController(formData, setSuccess, setError, navigate);
+    setLoading(false);
   };
   return (
     <div className="flex z-0 flex-col w-full max-lg:max-w-full max-lg:p-[20px]">
@@ -118,7 +123,7 @@ function RegisterForm() {
             onFailure={handleGoogleLoginFailure}
           />
           {error && <p>{error}</p>}
-        {/* <div className="flex flex-col mt-2 w-full text-xl max-lg:text-lg max-lg:max-w-full">
+          {/* <div className="flex flex-col mt-2 w-full text-xl max-lg:text-lg max-lg:max-w-full">
           <LoginButton provider="Facebook" iconSrc="Icon/FBicon.svg" />
           <LoginButton provider="Google" iconSrc="Icon/GGicon.svg" /> */}
         </div>
