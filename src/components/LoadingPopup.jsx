@@ -36,7 +36,7 @@ function LoadingPopup() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="flex flex-col bg-neutral-900 max-w-[607px] w-full max-h-[347px] max-lg:max-w-[320px]">
+      <div className="flex flex-col bg-neutral-900 max-w-[360px] w-full max-h-[320px] max-lg:max-w-[240px]">
         {/* Hình ảnh góc trên bên trái và bên phải */}
         <div className="relative flex flex-wrap gap-5 justify-between w-full bg-none">
           {/* Hình ảnh góc trên bên trái */}
@@ -59,7 +59,7 @@ function LoadingPopup() {
           {/* <MoonLoader color="#CFF500" size={80} className="hidden lg:block" /> */}
           <MoonLoader
             color="#CFF500"
-            size={60}
+            size={32}
             className="hidden max-lg:block"
           />
           <p className="mt-4 text-[#CFF500]">Đang tải...</p>
