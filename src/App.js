@@ -7,7 +7,7 @@ import Layout from './layouts/Layout';
 import UserRoutes from './layouts/UserRoutes';
 import PublicRoutes from './layouts/PublicRoutes';
 import Main from './layouts/public/Main';
-import MainCourse from './layouts/public/MainCourse';
+// import MainCourse from './layouts/public/MainCourse';
 import MainPublic from './layouts/public/MainPublic';
 import AuthMain from './layouts/public/AuthMain';
 import MainUser from './layouts/private/MainUser';

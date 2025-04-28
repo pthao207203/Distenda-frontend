@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoginButton from "./LoginButton.jsx";
@@ -43,6 +42,10 @@ function LoginForm({ onForgotPassword }) {
   //Xử lý đăng nhập Facebook
   const handleFacebookLoginSuccess = async (fbResponse) => {
     try {
+      console.log({
+        accessToken: fbResponse.accessToken,
+        userID: fbResponse.userID,
+      });
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/auth/login/facebook`,
         { accessToken: fbResponse.accessToken, userID: fbResponse.userID },
@@ -122,8 +125,8 @@ function LoginForm({ onForgotPassword }) {
           <LoginButton
             provider="Google"
             iconSrc="Icon/GGicon.svg"
-            onSuccess={handleFacebookLoginSuccess}
-            onFailure={handleFacebookLoginFailure}
+            onSuccess={handleGoogleLoginSuccess}
+            onFailure={handleGoogleLoginFailure}
           />
           <FacebookLoginButton
             provider="Facebook"

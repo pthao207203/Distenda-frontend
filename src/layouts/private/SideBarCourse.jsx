@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
 import { headerController } from "../../controllers/home.controller";
 import {
   addNotification,
@@ -17,12 +16,6 @@ const SideBar = ({ headerHeight }) => {
   const [member, setMember] = useState("");
   const [isOpen, setIsOpen] = useState(false); // Quản lý trạng thái mở/đóng của Sidebar
   const [isDesktop, setIsDesktop] = useState(false); // Xác định xem có phải màn hình lớn hay không
-  const location = useLocation(); // Lấy thông tin URL hiện tại
-  const menuItems = [
-    { name: "Khóa học của tôi", link: "/courses/CoursePurchased" },
-    { name: "Đang học", link: "/courses/CourseStudying" },
-    { name: "Đã hoàn thành", link: "/courses/CourseCompleted" },
-  ];
 
   // Kiểm tra kích thước màn hình
   useEffect(() => {

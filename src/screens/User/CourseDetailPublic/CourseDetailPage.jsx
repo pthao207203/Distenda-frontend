@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import CourseContent from "./CourseContent";
-import PageNav from "./PageNav";
 import LoginRequest from "../CourseDetailPublic/LoginRequest";
 import CheckoutPage from "../Payment/CheckoutPage";
 import Bank from "../Payment/Bank";

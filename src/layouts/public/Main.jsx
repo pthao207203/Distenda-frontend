@@ -36,7 +36,7 @@ const Main = () => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.offsetHeight);
     }
-  }, [headerRef.current]);
+  }, []);
 
   return (
     <div className="bg-[url('../Image/BG.png')] overflow-x-hidden bg-cover bg-center bg-fixed flex flex-col justify-center pb-0 bg-[#131313] min-h-screen">

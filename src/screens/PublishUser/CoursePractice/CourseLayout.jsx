@@ -4,16 +4,12 @@ import LessonList from "./LessonList";
 import CodeEditor from "./CodeEditor";
 import { useParams } from "react-router-dom";
 import { videoController } from "../../../controllers/video.controller";
-import {
-  userMarkVideoCompletedController,
-  getVideoStatusController,
-} from "../../../controllers/user.controller";
+import { userMarkVideoCompletedController } from "../../../controllers/user.controller";
 import Loading from "../../../components/Loading";
 
 function CourseLayout() {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
-  const [videoCompleted, setVideoCompleted] = useState(false);
   const { VideoSlug } = useParams();
   const [videoStatusList, setVideoStatusList] = useState({});
 
@@ -49,27 +45,26 @@ function CourseLayout() {
   //   }
   // };
 
-
   const markVideoAsCompleted = async (videoId) => {
     if (data) {
       // Gọi API để đánh dấu video đã hoàn thành
       const requestData = {
         courseId: data.course._id,
-        videoId: videoId, 
+        videoId: videoId,
       };
-      console.log('Request Data:', requestData);
+      console.log("Request Data:", requestData);
       try {
         const response = await userMarkVideoCompletedController(requestData);
-        console.log('Response from API:', response);
+        console.log("Response from API:", response);
         if (response) {
           setVideoStatusList((prevStatus) => ({
             ...prevStatus,
             [videoId]: 1, // Update video status as completed
           }));
         }
-     } catch (error) {
+      } catch (error) {
         console.error("Error marking video as completed:", error);
-     }
+      }
     }
   };
 
