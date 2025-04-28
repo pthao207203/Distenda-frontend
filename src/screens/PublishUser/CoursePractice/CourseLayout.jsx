@@ -5,7 +5,8 @@ import CodeEditor from "./CodeEditor";
 import { useParams } from "react-router-dom";
 import { videoController } from "../../../controllers/video.controller";
 import { userMarkVideoCompletedController } from "../../../controllers/user.controller";
-import Loading from "../../../components/Loading";
+import { Helmet } from "react-helmet";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 function CourseLayout() {
   const [data, setData] = useState();
@@ -68,31 +69,34 @@ function CourseLayout() {
     }
   };
 
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
-    <div className="flex flex-col bg-neutral-900">
-      <NavigationBar {...data} />
-      <div className="flex flex-col w-full max-md:max-w-full h-full">
-        <div className="flex overflow-hidden flex-wrap flex-1 gap-1.5 justify-center bg-white bg-opacity-10 size-full max-md:max-w-full">
-          {data && data.course && (
-            <>
-              <div className="flex flex-col overflow-y-auto h-[calc(100vh-200px)] max-w-[28rem] lg:block">
-                <LessonList
-                  course={data.course}
-                  videoKey={data._id}
-                  videoStatusList={videoStatusList}
-                  markVideoAsCompleted={markVideoAsCompleted}
-                />
-              </div>
-              <CodeEditor {...data} />
-            </>
-          )}
+    <>
+      <Helmet>
+        <title>{data ? data.VideoName : "Bài học"}</title>
+      </Helmet>
+
+      {loading && <LoadingPopup />}
+      <div className="flex flex-col bg-neutral-900">
+        <NavigationBar {...data} />
+        <div className="flex flex-col w-full max-md:max-w-full h-full">
+          <div className="flex overflow-hidden flex-wrap flex-1 gap-1.5 justify-center bg-white bg-opacity-10 size-full max-md:max-w-full">
+            {data && data.course && (
+              <>
+                <div className="flex flex-col overflow-y-auto h-[calc(100vh-200px)] max-w-[28rem] lg:block max-lg:hidden">
+                  <LessonList
+                    course={data.course}
+                    videoKey={data._id}
+                    videoStatusList={videoStatusList}
+                    markVideoAsCompleted={markVideoAsCompleted}
+                  />
+                </div>
+                <CodeEditor {...data} />
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

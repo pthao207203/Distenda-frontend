@@ -3,29 +3,33 @@ import axios from "axios";
 import ProductCard from "./ProductCard";
 import UserForm from "./UserForm";
 
-export default function CheckoutPage({
-  onClose,
-  ...course
-}) {
-
+export default function CheckoutPage({ onClose, ...course }) {
   const productDetails = {
     title: `${course.CourseName}`,
     duration: `${course.CourseDuration} tháng`,
-    price: course.CoursePrice === 0 ? "Miễn phí" : (course.CoursePrice * (100 - course.CourseDiscount) / 100).toLocaleString('vi-VN'),
-    imageUrl: `${course.CoursePicture}`
+    price:
+      course.CoursePrice === 0
+        ? "Miễn phí"
+        : (
+            (course.CoursePrice * (100 - course.CourseDiscount)) /
+            100
+          ).toLocaleString("vi-VN"),
+    imageUrl: `${course.CoursePicture}`,
   };
 
   const userDetails = {
     fullName: `${course?.user?.UserFullName || "Không có"}`,
     email: `${course?.user?.UserEmail || ""}`,
-    phone: `${course?.user?.UserPhone || ""}`
+    phone: `${course?.user?.UserPhone || ""}`,
   };
 
   const handlePayment = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/pay/${course.CourseSlug}/momo`, {}, {
-          withCredentials: true
+        `http://localhost:3001/pay/${course.CourseSlug}/momo`,
+        {},
+        {
+          withCredentials: true,
         } // Cho phép gửi cookie kèm theo request
       );
 
@@ -50,13 +54,13 @@ export default function CheckoutPage({
           className="object-contain self-end aspect-[0.94] hover:brightness-110 hover:scale-105 transition duration-200"
         />
       </button>
-      <div className="flex flex-col px-10 mt-2 w-full max-md:px-5 max-md:max-w-full">
-        <div className="flex flex-col w-full max-md:max-w-full">
+      <div className="flex flex-col px-10 mt-2 w-full max-lg:px-5 max-lg:max-w-full">
+        <div className="flex flex-col w-full max-lg:max-w-full">
           <ProductCard {...productDetails} />
-          <p className="mt-4 text-xl font-medium leading-none text-black">
+          <p className="mt-4 text-xl max-lg:text-[14px] font-medium leading-none text-black">
             Tổng giá trị: {productDetails.price}
           </p>
-          <div className="flex flex-col mt-4 w-full text-xl font-medium text-neutral-900">
+          <div className="flex flex-col mt-4 w-full text-xl max-lg:text-[14px] font-medium text-neutral-900">
             <label htmlFor="discountCode">Mã giảm giá</label>
             <input
               type="text"
@@ -64,12 +68,15 @@ export default function CheckoutPage({
               className="flex gap-2.5 px-2 py-2 mt-2 bg-[#EBF1F9] min-h-[38px] w-2/3"
             />
           </div>
-          <p className="mt-4 text-xl font-medium leading-none text-black">
+          <p className="mt-4 text-xl max-lg:text-[14px] font-medium leading-none text-black">
             Thành tiền: {productDetails.price}
           </p>
           <UserForm userDetails={userDetails} />
         </div>
-        <button onClick={handlePayment} className="flex gap-3 justify-center items-center self-center px-3 py-4 mt-9 text-xl font-medium text-white bg-neutral-900 w-[272px]">
+        <button
+          onClick={handlePayment}
+          className="flex gap-3 justify-center items-center self-center px-3 py-4 mt-9 text-xl max-lg:text-[14px] font-medium text-white bg-neutral-900 w-[272px]"
+        >
           <span>Đăng ký</span>
         </button>
       </div>

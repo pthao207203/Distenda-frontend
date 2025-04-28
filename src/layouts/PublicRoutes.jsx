@@ -1,13 +1,11 @@
-import React from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
-import Cookies from 'js-cookie';
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const PublicRoutes = () => {
-  let token = Cookies.get('user_token');
-  console.log("token ", token)
-  return (
-    !token ? <Outlet /> : <Navigate to='/' />
-  )
-}
+  let token = Cookies.get("user_token");
+  console.log("token ", token);
+  return !token ? <Outlet /> : <Navigate to="/courses" />;
+};
 
-export default PublicRoutes
+export default PublicRoutes;

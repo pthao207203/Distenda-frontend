@@ -114,7 +114,7 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
         >
           <button
             onClick={toggleTaskBar}
-            className="flex items-center shrink gap-2"
+            className="flex items-center justify-center shrink gap-2"
           >
             <img
               loading="lazy"
@@ -124,13 +124,13 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
                   : "https://cdn.builder.io/api/v1/image/assets/9c7992bcbe164b8dad4f2629b8fc1688/2b926db059289d5c08128dea3316455c4081d26d19035d156f09a2e2fbe1385b?apiKey=9c7992bcbe164b8dad4f2629b8fc1688&"
               }
               alt=""
-              className="object-cover shrink-0 w-[30px] rounded-full aspect-square"
+              className="object-cover shrink-0 w-[4rem] max-lg:w-[30px] rounded-full aspect-square"
             />
             <img
               loading="lazy"
               src={`/Icon/${openDetails ? "tam_giac2" : "tam_giac"}.svg`}
               alt=""
-              className="object-center shrink-0 w-[15px] aspect-[2.14]"
+              className="object-center shrink-0 w-[1.5rem] max-lg:w-[15px] aspect-[2.14]"
             />
           </button>
         </div>

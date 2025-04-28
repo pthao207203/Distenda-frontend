@@ -21,7 +21,7 @@ const SideBar = ({ headerHeight }) => {
     { name: "Khóa học của tôi", link: "/courses/CoursePurchased" },
     { name: "Đang học", link: "/courses/CourseStudying" },
     { name: "Đã hoàn thành", link: "/courses/CourseCompleted" },
-    { name: "Tin nhắn", link: "/user/message"},
+    { name: "Tin nhắn", link: "/user/message" },
   ];
 
   // Kiểm tra kích thước màn hình
@@ -178,9 +178,10 @@ const SideBar = ({ headerHeight }) => {
             <Link
               to={item.link}
               key={index}
-              className={`flex gap-2 items-center py-[16px] pl-[16px] w-[95%] transition ${
+              className={`flex gap-2 items-center py-[16px] max-lg:py-[10px] pl-[16px] w-[95%] transition ${
                 location.pathname === item.link ? "bg-black" : "bg-transparent"
               }`}
+              onClick={() => setIsOpen(false)}
             >
               <div className="flex-1">{item.name}</div>
             </Link>
@@ -192,7 +193,7 @@ const SideBar = ({ headerHeight }) => {
       {!isDesktop && !isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-5 left-2 z-50 p-2 bg-black text-white rounded-md max-md:top-5 max-md:left-5"
+          className="fixed top-5 left-2 z-50 p-2 bg-black text-white rounded-md max-lg:top-5 max-lg:left-5"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

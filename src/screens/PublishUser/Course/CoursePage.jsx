@@ -7,13 +7,12 @@ import { coursesController } from "../../../controllers/course.controller";
 //import TestimonialSection from "./TestimonialSection"; // Import TestimonialSection
 //import TeacherSection from "./TeacherSection"; // Import TeacherSection
 import Banner from "./Banner";
-import Loading from "../../../components/Loading";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 function CoursePage() {
   const [allCourses, setAllCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
-  const [loading, setLoading] = useState(false);
-
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -28,15 +27,16 @@ function CoursePage() {
 
   const handleSearch = (keyword) => {
     const lowerKeyword = keyword.toLowerCase();
-    const filtered = allCourses.filter(course =>
+    const filtered = allCourses.filter((course) =>
       course.CourseName.toLowerCase().includes(lowerKeyword)
     );
     setFilteredCourses(filtered);
   };
 
-  if (loading) {
-    return <Loading />;
-  }
+  // if (loading) {
+  //   // return <Loading />;
+  //   return <LoadingPopup />;
+  // }
   // console.log("courses => ", filteredCourses);
 
   return (
@@ -44,6 +44,8 @@ function CoursePage() {
       <Helmet>
         <title>Khóa học</title>
       </Helmet>
+
+      {loading && <LoadingPopup />}
       <div className="flex flex-col w-full min-h-screen">
         {/* Sidebar */}
         {/*<SideBar />*/}

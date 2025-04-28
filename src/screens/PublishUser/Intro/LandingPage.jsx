@@ -8,6 +8,8 @@ import TeacherSection from "./TeacherSection";
 import { Container, Row, Col } from "react-bootstrap";
 import { homeController } from "../../../controllers/home.controller";
 import Loading from "../../../components/Loading";
+import LoadingPopup from "../../../components/LoadingPopup";
+import { Helmet } from "react-helmet";
 
 function LandingPage() {
   const [data, setData] = useState({
@@ -34,6 +36,10 @@ function LandingPage() {
   console.log("courses ", data.courses);
   return (
     <>
+      <Helmet>
+        <title>Trang chủ</title>
+      </Helmet>
+      {loading && <LoadingPopup />}
       {/* Hero Section */}
       <section className="py-5 w-full text-white px-1 hidden lg:block">
         <Container fluid className="px-0">

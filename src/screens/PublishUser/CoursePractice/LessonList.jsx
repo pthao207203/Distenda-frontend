@@ -30,7 +30,7 @@ function LessonCard({
   ...lesson
 }) {
   return (
-    <div className="flex overflow-hidden flex-col w-full text-xl max-lg:text-[16px] leading-none">
+    <div className="flex overflow-hidden flex-col w-full text-xl max-lg:text-[14px]">
       <div className="flex gap-3 items-center px-3 py-4 w-full font-medium leading-5 text-white bg-neutral-900 min-h-[60px]">
         <div className="flex-1 shrink gap-2.5 self-stretch my-auto w-full max-w-[28rem]">
           {lesson ? lesson.LessonName : ""}

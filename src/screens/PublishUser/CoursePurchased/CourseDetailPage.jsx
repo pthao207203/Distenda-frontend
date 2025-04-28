@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import CourseHeader from "./CourseHeader";
 import CourseContent from "./CourseContent";
 import { courseDetailController } from "../../../controllers/course.controller";
-import Loading from "../../../components/Loading";
 import { useParams } from "react-router-dom";
 import Rating from "./Rating";
+import { Helmet } from "react-helmet";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 export default function CourseDetailPage() {
   const [data, setData] = useState();
@@ -28,10 +29,13 @@ export default function CourseDetailPage() {
   }, [CourseSlug]);
 
   console.log("course => ", data);
-  if (loading) {
-    return <Loading />;
-  } else
-    return (
+  return (
+    <>
+      <Helmet>
+        <title>{data ? data.CourseName : "Chi tiết khoá học"}</title>
+      </Helmet>
+
+      {loading && <LoadingPopup />}
       <div className="flex overflow-hidden flex-col">
         <CourseHeader {...data} />
         <div className="flex z-10 flex-col lg:px-[6rem] mt-0 w-full bg-white bg-opacity-10 min-h-screen max-lg:mt-0 max-lg:px-[20px] max-lg:max-w-full">
@@ -44,5 +48,6 @@ export default function CourseDetailPage() {
           />
         </div>
       </div>
-    );
+    </>
+  );
 }

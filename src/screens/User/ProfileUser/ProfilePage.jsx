@@ -7,6 +7,7 @@ import {
 } from "../../../controllers/user.controller";
 import axios from "axios";
 import ThankYouPage from "../Payment/ThankYouPage";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 function ProfilePage() {
   let [data, setData] = useState(null);
@@ -97,15 +98,12 @@ function ProfilePage() {
     }
   };
 
-  if (loading) {
-    return <div>Đang tải...</div>;
-  }
-
   return (
     <>
       <Helmet>
         <title>Thông tin cá nhân</title>
       </Helmet>
+      {loading && <LoadingPopup />}
       <div
         className="flex flex-col w-full min-h-screen"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.03)" }}

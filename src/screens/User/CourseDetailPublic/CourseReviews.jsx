@@ -25,7 +25,7 @@ export default function CourseReviews(reviews) {
     totalVotes += count; // Cộng dồn số lượt vote
     totalPoints += star * count; // Tính tổng điểm
   }
-  const voteAve = totalVotes > 0 ? (totalPoints / totalVotes).toFixed(1) : 0;
+  const voteAve = totalVotes > 0 ? (totalPoints / totalVotes).toFixed(1) : 5;
 
   return (
     <section className="flex flex-col items-start self-start text-white w-full rounded-3xl ">
