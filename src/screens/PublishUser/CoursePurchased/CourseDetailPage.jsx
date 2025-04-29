@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CourseHeader from "./CourseHeader";
 import CourseContent from "./CourseContent";
+import CertificatePopup from "./CertificatePopup";
 import { courseDetailController } from "../../../controllers/course.controller";
 import { getVideoStatusController } from "../../../controllers/user.controller";
 import { useParams } from "react-router-dom";
@@ -62,8 +63,9 @@ export default function CourseDetailPage() {
       </Helmet>
 
       {loading && <LoadingPopup />}
+
       <div className="flex overflow-hidden flex-col">
-        <CourseHeader {...data} progressStatus={progressStatus} />
+        <CourseHeader course={data} progressStatus={progressStatus} onOpenCertificate={() => setShowCertificate(true)} />
         <div className="flex z-10 flex-col lg:px-[6rem] mt-0 w-full bg-white bg-opacity-10 min-h-screen max-lg:mt-0 max-lg:px-[20px] max-lg:max-w-full">
           <CourseContent
             {...data}
@@ -77,7 +79,17 @@ export default function CourseDetailPage() {
             has={data?.review}
           />
         </div>
+
+        {/* Render popup ở cuối cùng */}
+        {showCertificate && (
+        <CertificatePopup
+        userName={data?.user?.UserFullName || "Tên học viên"}
+        courseName={data?.CourseName || "Tên khoá học"}
+        instructorName={data?.intructor?.AdminFullName || "Tên giảng viên"}
+        onClose={() => setShowCertificate(false)}
+      />
+      )}
       </div>
-    </>
-  );
+      </>
+    );
 }
