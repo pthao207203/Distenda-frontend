@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { headerController } from "../../controllers/home.controller";
-import Loading from "../../components/Loading";
 
 export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
   const [activeLink, setActiveLink] = useState("");
@@ -21,10 +20,9 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
     category: [],
     setting: [],
   });
-  const [loading, setLoading] = useState(false);
   useEffect(() => {
     async function fetchData() {
-      const result = await headerController(setLoading);
+      const result = await headerController();
       // console.log("result", result)
       setData(result);
     }
@@ -50,9 +48,6 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
     }
   }, [location.pathname]);
 
-  if (loading) {
-    return <Loading />;
-  }
   // console.log("category ", data.category)
   // console.log("setting ", data.setting)
 
