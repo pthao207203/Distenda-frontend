@@ -16,7 +16,7 @@ export default function CourseDetailPage() {
   const [lessonRateMap, setLessonRateMap] = useState({});
   const [progressStatus, setProgressStatus] = useState(0);
   const { CourseSlug } = useParams();
-
+  const [showCertificate, setShowCertificate] = useState(false);
   useEffect(() => {
     if (!CourseSlug) return;
     (async () => {
@@ -65,7 +65,7 @@ export default function CourseDetailPage() {
       {loading && <LoadingPopup />}
 
       <div className="flex overflow-hidden flex-col">
-        <CourseHeader course={data} progressStatus={progressStatus} onOpenCertificate={() => setShowCertificate(true)} />
+        <CourseHeader {...data} progressStatus={progressStatus} onOpenCertificate={() => setShowCertificate(true)} />
         <div className="flex z-10 flex-col lg:px-[6rem] mt-0 w-full bg-white bg-opacity-10 min-h-screen max-lg:mt-0 max-lg:px-[20px] max-lg:max-w-full">
           <CourseContent
             {...data}

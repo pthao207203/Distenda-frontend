@@ -1,7 +1,6 @@
 import * as React from "react";
 
-export default function CoursesInfo({ progressStatus, course}) {
-  const { onOpenCertificate } = course; 
+export default function CoursesInfo({  progressStatus, onOpenCertificate, ...course}) {
   console.log("Course:", course);
   let lessons = [];
 
