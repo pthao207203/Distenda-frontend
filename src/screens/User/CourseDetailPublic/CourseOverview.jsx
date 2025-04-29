@@ -3,9 +3,9 @@ import parse from "html-react-parser";
 
 export default function CourseOverview(course) {
   return (
-    <div className="flex overflow-hidden flex-col items-start px-[73px] pt-14 pb-9 w-full bg-[#131313] max-md:px-5 max-md:max-w-full max-md:px-[20px]">
+    <div className="flex overflow-hidden flex-col items-start px-[73px] pt-14 pb-9 w-full bg-[#131313] max-md:px-5 max-md:max-w-full">
       <div className="flex gap-3 justify-center items-center px-3 max-w-full md:text-[1.25rem] text-[16px] font-medium leading-none bg-[#CFF500] border-2 border-black border-solid min-h-[40px] shadow-[-6px_6px_0px_rgba(255,255,255,1)] text-neutral-900  max-md:ml-2">
-        <span className="gap-2.5 self-center my-auto">
+        <span className="gap-2.5 self-center my-auto w-fit">
           {course.CoursePrice === 0 ? "Miễn phí" : "Pro"}
         </span>
       </div>
