@@ -60,9 +60,10 @@ export default function CertificatePopup({
   return (
     <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
       {/* Popup chỉ chứa chứng chỉ, không chứa nút */}
-      <div className="relative max-w-[90%] max-h-[90%] overflow-auto rounded-lg p-4 bg-white flex justify-center items-center">
-        <div className="transform scale-[0.7] origin-center">
-          <div ref={certificateRef}>
+      
+      <div className="relative max-w-[65%] max-h-[90%] rounded-lg bg-white/70 flex justify-center items-center">
+        <div ref={certificateRef}>
+            <div className="transform scale-[0.7] origin-center">
             <div className="frame">
               <div className="div">
                 <div className="text-wrapper">{userName}</div>
@@ -75,7 +76,7 @@ export default function CertificatePopup({
       </div>
 
       {/* Các nút nằm ngoài popup */}
-      <div className="absolute bottom-8 flex gap-4 justify-center">
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4 z-50">
         <button
           onClick={downloadPNG}
           className="bg-green-500 text-white px-4 py-2 rounded"
