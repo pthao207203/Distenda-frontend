@@ -10,7 +10,7 @@ import {
     loadMessages,
     sendMessage,
     updateMessageStatus,
-    markAllMessagesFromInstructorAsRead,
+
 } from '../../../controllers/message.controller';
 import { getMessages } from '../../../services/message.service';
 import { io } from "socket.io-client";
@@ -25,8 +25,6 @@ const Message = () => {
     const [messagesByInstructor, setMessagesByInstructor] = useState({});
     const [newMessage, setNewMessage] = useState('');
     const token = Cookies.get('user_token');
-    const userId = Cookies.get('user_id');
-    const messagesEndRef = useRef(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [previewImageUrl, setPreviewImageUrl] = useState(null);
     const uploadImagePreviewRef = useRef(null);
@@ -36,6 +34,9 @@ const Message = () => {
     const [infoImages, setInfoImages] = useState([]);  // State lưu danh sách ảnh
     const [infoFiles, setInfoFiles] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
+    const chatContainerRef = useRef(null);
+
+
 
 
     const openInfoMessagePopup = () => {
@@ -151,6 +152,14 @@ const Message = () => {
         };
         setMessages(prev => [...prev, tempMessage]);
 
+        setNewMessage('');
+        setSelectedImage(null);
+        setPreviewImageUrl(null);
+        setSelectedFile(null);
+        if (uploadImagePreviewRef.current) {
+            uploadImagePreviewRef.current.src = "";
+        }
+
         setMessagesByInstructor(prev => {
             const updated = { ...prev };
             if (!updated[selectedInstructor.instructorId]) updated[selectedInstructor.instructorId] = [];
@@ -162,7 +171,7 @@ const Message = () => {
         const messageData = {
             receiverId: selectedInstructor.instructorId,
             receiverRole: 'admin',
-            content: newMessage.trim() || '',  // Content có thể là chuỗi rỗng
+            content: (newMessage || '').trim(),  // Content có thể là chuỗi rỗng
             image: uploadedImageUrl || '', // Image có thể là null hoặc chuỗi rỗng
             file: uploadedFileData || {}
         };
@@ -241,9 +250,10 @@ const Message = () => {
             console.error("❌ Lỗi khi lấy tin nhắn:", error);
         }
     };
+   
     useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     }, [message]);
 
@@ -280,50 +290,48 @@ const Message = () => {
         <>
             {instructors.length > 0 ? (
 
-                <main className="flex relative overflow-auto min-h-[calc(100vh-100px)] max-h-[calc(100vh-532px)] max-md:flex-col bg-none max-md:max-w-full">
+                <main className="flex  h-fit overflow-hiden min-h-[calc(100vh-76px)] max-h-[calc(100vh-532px)] max-md:flex-col bg-none max-md:max-w-full">
 
-                    <aside className="bg-black overflow-hidden-scroll flex-row md:order-2 min-w-fit px-[20px] py-[32px] max-md:px-[8px] max-md:py-[12px] max-md:w-full max-xl:ml-0 max-md:pr-0 max-md:min-h-[100px]">
-                        <div className="flex flex-col text-[24px] font-medium mb-4 bg-bl text-white max-md:hidden">
-                            <div className="p-[10px] bg-white bg-opacity-50 max-w-fit rounded-[8px] sticky top-0">
+                    <aside className="bg-black overflow-hidden-scroll flex-row md:order-2 min-w-fit min-h-full px-[1.25rem] py-[2rem] max-md:px-[0.5rem] max-md:py-[0.75rem] max-md:w-full max-xl:ml-0 max-md:pr-0 max-md:min-h-[60px]">
+                        <div className="flex flex-col text-[1.5rem] font-medium mb-4 text-white max-md:hidden">
+                            <div className="p-[0.625rem] bg-white bg-opacity-50 max-w-fit rounded-[0.5rem] sticky top-0">
                                 Hộp thư
                             </div>
                         </div>
 
-                        <div className="max-md:flex max-md:overflow-y-auto  overflow-x-auto overflow-hidden-scroll  ">
-                            <div className="max-md:flex text-white  flex-nowrap md:space-y-4 max-md:space-x-4 max-md:min-w-screen max-w-fit ">
+                        <div className="max-md:flex max-md:overflow-y-auto overflow-x-auto overflow-hidden-scroll">
+                            <div className="max-md:flex text-white flex-nowrap md:space-y-4 max-md:space-x-4 max-md:min-w-screen max-w-fit">
                                 {(instructors || []).map((teacher, i) => {
                                     const lastMessage = messagesByInstructor[teacher.instructorId]?.slice(-1)[0];
 
                                     return (
-
                                         <div
                                             key={teacher.instructorId || i}
-                                            onClick={() => handleSelectInstructor(teacher)} // ✅ thay ở đây
-                                            className="flex items-center max-w-fit "
+                                            onClick={() => handleSelectInstructor(teacher)}
+                                            className="flex items-center max-w-fit"
                                         >
-
                                             <img
                                                 src={teacher.instructorAvatar || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5ebxW2tkf1OlwOYEF2K55p7OwwX9bhwsN6Q&s'}
                                                 alt="avatar"
-                                                className="h-[63px] max-w-[63px] min-w-[63px] mr-[20px] max-md:aspect-[1.25] rounded-full object-cover"
+                                                className="h-[40px] max-w-[40px] min-w-[40px] mr-[10px] max-md:aspect-[1.25] rounded-full object-cover"
                                             />
-                                            <div className="flex items-center justify-between space-y-0 max-md:hidden ">
-                                                <div className="flex-col justify-between space-y-2 w-full ">
-                                                    <div className="text-[20px] font-semibold">
+                                            <div className="flex items-center justify-between space-y-0 max-md:hidden">
+                                                <div className="flex-col justify-between space-y-2 w-full">
+                                                    <div className="text-[1.25rem] font-semibold">
                                                         {teacher.instructorName
                                                             ? teacher.instructorName.split(" ").slice(-2).join(" ")
                                                             : "Giáo viên"}
                                                     </div>
-                                                    <div className="flex justify-between w-fit text-regular text-[18px]  text-white ">
+                                                    <div className="flex justify-between w-fit text-regular text-[1.125rem] text-white">
                                                         {
                                                             messagesByInstructor[teacher.instructorId]?.length > 0
                                                                 ? <>
                                                                     <div
-                                                                        className="truncate leading-tight  "
+                                                                        className="truncate leading-tight"
                                                                         style={{
                                                                             textOverflow: 'ellipsis',
                                                                             whiteSpace: 'nowrap',
-                                                                            width: '150px',
+                                                                            width: '9.375rem',  // 150px = 9.375rem
                                                                             overflow: 'hidden',
                                                                         }}
                                                                     >
@@ -339,54 +347,51 @@ const Message = () => {
                                                                             lastMessage.content
                                                                         )}
                                                                     </div>
-                                                                    <div className="whitespace-nowrap leading-tight  xl:ml-[20px] md:ml-[10px]">
+                                                                    <div className="whitespace-nowrap leading-tight xl:ml-[1.25rem] md:ml-[0.625rem]">
                                                                         {new Date(messagesByInstructor[teacher.instructorId].slice(-1)[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                                     </div>
                                                                 </>
-                                                                : <div className="truncate text-white  text-regular text-[18px]">Chat ngay với giảng viên</div>
+                                                                : <div className="truncate text-white text-regular text-[1.1245rem]">Chat ngay với giảng viên</div>
                                                         }
                                                     </div>
-
                                                 </div>
 
-                                                {/* Dấu chấm nếu có tin chưa đọc */}
                                                 {
                                                     messagesByInstructor[teacher.instructorId]?.some(msg => msg.isRead === false && msg.sender.senderRole === 'admin')
-                                                        ? <div className="w-3 h-3 rounded-full bg-[#CFF500] ml-4 border border-black" />
-                                                        : <div className="w-3 h-3 rounded-full bg-none ml-4 " style={{ visibility: 'hidden' }} />
+                                                        ? <div className="w-[0.75rem] h-[0.75rem] rounded-full bg-[#CFF500] ml-[1rem] border border-black" />
+                                                        : <div className="w-[0.75rem] h-[0.75rem] rounded-full bg-none ml-[1rem]" style={{ visibility: 'hidden' }} />
                                                 }
                                             </div>
 
                                             {/* Dành cho mobile */}
-                                            <div className="md:hidden ml-auto max-md:mx-[-13px] max-md:mt-[35px]">
+                                            <div className="md:hidden ml-auto">
                                                 {
                                                     messagesByInstructor[teacher.instructorId]?.some(msg => msg.isRead === false && msg.sender.senderRole === 'admin') &&
-                                                    <div className="w-3 h-3 rounded-full bg-[#CFF500] border border-black" />
+                                                    <div className="w-7 h-7 rounded-full bg-[#CFF500] border border-black max-md:mx-[-17px] max-md:mt-[25px]" />
                                                 }
                                             </div>
                                         </div>
-
                                     );
                                 })}
-
                             </div>
                         </div>
                     </aside>
 
+
                     {/* Khung chat chính */}
-                    <div className="flex flex-col w-full max-w-full bg-none text-white min-h-[calc(100vh-100px)] max-h-[calc(100vh-532px)]">
-                        <div className="flex items-center justify-between bg-none px-[20px] py-[12px] text-[20px] font-semibold h-[87px]">
+                    <div className="flex flex-col justify-between w-full max-w-full bg-none text-white  min-h-[calc(100vh-150px)]    ">
+                        <div className="flex items-center justify-between bg-none px-[20px] py-[12px] text-[12px] lg:text-[1.25rem]  font-semibold h-[50px]">
                             <div className="flex items-center">
                                 <img
                                     src={selectedInstructor?.instructorAvatar || 'https://cdn.builder.io/api/v1/image/assets/TEMP/bbae0514e8058efa2ff3c88f32951fbd7beba3099187677c6ba1c2f96547ea3f?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e'}
                                     alt="avatar"
-                                    className="h-[63px] w-[63px] rounded-full object-cover"
+                                    className="h-[40px] w-[40px] rounded-full object-cover"
                                 />
                                 <div className="pl-[20px]">{selectedInstructor?.instructorName || ''}</div>
                             </div>
                             <button
                                 onClick={openInfoMessagePopup}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="25" viewBox="0 0 26 25" fill="none">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 26 25" fill="none">
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M13 1.875C7.14125 1.875 2.375 6.64125 2.375 12.5C2.375 18.3587 7.14125 23.125 13 23.125C18.8587 23.125 23.625 18.3587 23.625 12.5C23.625 6.64125 18.8587 1.875 13 1.875ZM13 25C6.1075 25 0.5 19.3925 0.5 12.5C0.5 5.6075 6.1075 0 13 0C19.8925 0 25.5 5.6075 25.5 12.5C25.5 19.3925 19.8925 25 13 25Z" fill="white" />
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M12.9927 14.2161C12.4752 14.2161 12.0552 13.7961 12.0552 13.2786V7.75488C12.0552 7.23738 12.4752 6.81738 12.9927 6.81738C13.5102 6.81738 13.9302 7.23738 13.9302 7.75488V13.2786C13.9302 13.7961 13.5102 14.2161 12.9927 14.2161Z" fill="white" />
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M13.0048 18.4951C12.3135 18.4951 11.7485 17.9364 11.7485 17.2451C11.7485 16.5539 12.3023 15.9951 12.9923 15.9951H13.0048C13.696 15.9951 14.2548 16.5539 14.2548 17.2451C14.2548 17.9364 13.696 18.4951 13.0048 18.4951Z" fill="white" />
@@ -395,18 +400,21 @@ const Message = () => {
                         </div>
 
                         {/* Nội dung tin nhắn */}
-                        <div className="flex flex-col overflow-hidden-scroll overflow-y-auto justify-between justify-items-between bg-white min-h-[calc(100vh-187px)] max-h-[calc(100vh-532px)] bg-opacity-10 backdrop-blur-[20px] p-[20px] space-y-4 text-[20px] ">
-
-                            <div className="flex flex-col overflow-hidden-scroll space-y-4 overflow-y-auto max-h-fit " >
+                        <div className="flex flex-col h-full overflow-hidden-scroll overflow-y-auto justify-between justify-items-between bg-white min-h-[calc(100vh-150px)] overflow-hidden-scroll bg-opacity-10 backdrop-blur-[20px] overflow-auto p-[20px] space-y-[1rem] text-[12px] lg:text-[1.25rem] ">
+                            <div
+                                ref={chatContainerRef}
+                                className="flex flex-col h-full overflow-y-auto overflow-hidden-scroll space-y-4 overflow-y-auto"
+                                style={{ maxHeight: "calc(100vh - 250px)" }}
+                            >
                                 <div className="flex-col justify-start items-start">
                                     <div
-                                        className="bg-[url('/Image/BG.png')] object-contain w-full h-[300px] rounded-[10px] border-t border-black"
+                                        className="bg-[url('/Image/BG.png')] object-contain w-full h-[200px] rounded-[10px] border-t border-black"
                                     />
                                     <div className="flex flex-col items-center justify-center w-full">
                                         <img
                                             src={selectedInstructor?.instructorAvatar || 'https://cdn.builder.io/api/v1/image/assets/TEMP/bbae0514e8058efa2ff3c88f32951fbd7beba3099187677c6ba1c2f96547ea3f?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e'}
                                             alt="avatar"
-                                            className="mt-[-100px] h-[200px] w-[200px] rounded-full object-cover"
+                                            className="mt-[-50px] h-[100px] w-[100px] rounded-full object-cover"
                                         />
                                         {/* {
                                     !selectedInstructor?
@@ -480,13 +488,15 @@ const Message = () => {
                                                 <p className="mt-2">{msg.content}</p>
                                             )}
                                         </div>
-                                        <div ref={messagesEndRef} />
+                    
                                     </div>
                                 ))}
+
                             </div>
 
+
                             {/* Nhập tin nhắn */}
-                            <div className="p-4 bg-white rounded-b-[8px] flex items-end space-y-2 space-x-2 w-full">
+                            <div className="p-4 bg-white rounded-[8px] flex items-end space-y-2 space-x-2 w-full">
                                 <div className="flex flex-col items-start w-full">
                                     <input
                                         type="text"
@@ -494,6 +504,12 @@ const Message = () => {
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         placeholder="Nhập tin nhắn..."
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();  // Ngăn xuống dòng
+                                                handleSendMessage(); // Gọi hàm gửi tin nhắn
+                                            }
+                                        }}
                                     />
                                     <div className="flex items-start w-full">
                                         <input
@@ -566,26 +582,72 @@ const Message = () => {
 
                                     </div>
                                     {previewImageUrl && (
-                                        <div className="mt-2">
+                                        <div className="mt-2 relative inline-block">
                                             <img
                                                 src={previewImageUrl}
                                                 alt="Preview"
                                                 className="w-24 h-24 object-cover border rounded"
                                             />
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedImage(null);
+                                                    setPreviewImageUrl(null);
+                                                    if (uploadImagePreviewRef.current) {
+                                                        uploadImagePreviewRef.current.src = "";
+                                                    }
+                                                }}
+                                                className="absolute top-[-3px] right-[-2px] bg-black border-2 border-white text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                            >
+                                                <img
+                                                    loading="lazy"
+                                                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/8bbfb14016c67d4716e0a6366eed76fac938e5a78f6cba88c3ed041abcc52d72?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
+                                                    className="absolute w-[10px] h-[10px] object-contain z-50"
+                                                />
+                                            </button>
                                         </div>
                                     )}
-
                                     {selectedFile && (
-                                        <div className="mt-2 text-sm text-white bg-black p-[20px] rounded-lg">
-                                            📄 {selectedFile.name}
+                                        <div className="mt-2 relative inline-block text-sm text-white bg-black p-[20px] rounded-lg">
+                                            <div className="flex justify-between px-[5px]">
+                                                        <div className="flex items-center gap-[5px]">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="white">
+                                                                <mask id="mask0_5477_2956" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="18" height="20">
+                                                                    <path fillRule="evenodd" clipRule="evenodd" d="M0 0.0117188H17.0527V19.8652H0V0.0117188Z" fill="white" />
+                                                                </mask>
+                                                                <g mask="url(#mask0_5477_2956)">
+                                                                    <path fillRule="evenodd" clipRule="evenodd" d="M4.5731 1.51172C2.9161 1.51172 1.5401 2.85372 1.5011 4.50872V15.2037C1.4641 16.9167 2.8141 18.3277 4.5101 18.3657H12.5741C14.2431 18.2967 15.5651 16.9097 15.5531 15.2097V6.33972L10.9181 1.51172H4.5851H4.5731ZM4.5851 19.8657H4.4761C1.9541 19.8087 -0.0538966 17.7107 0.00110343 15.1877V4.49072C0.0591034 2.00972 2.1081 0.0117188 4.5711 0.0117188H4.5881H11.2381C11.4421 0.0117188 11.6371 0.0947188 11.7791 0.241719L16.8441 5.51872C16.9781 5.65772 17.0531 5.84472 17.0531 6.03772V15.2037C17.0711 17.7127 15.1171 19.7627 12.6041 19.8647L4.5851 19.8657Z" />
+                                                                </g>
+                                                                <path fillRule="evenodd" clipRule="evenodd" d="M16.2986 6.98424H13.5436C11.7136 6.97924 10.2256 5.48724 10.2256 3.65924V0.750244C10.2256 0.336244 10.5616 0.000244141 10.9756 0.000244141C11.3896 0.000244141 11.7256 0.336244 11.7256 0.750244V3.65924C11.7256 4.66324 12.5426 5.48124 13.5456 5.48424H16.2986C16.7126 5.48424 17.0486 5.82024 17.0486 6.23424C17.0486 6.64824 16.7126 6.98424 16.2986 6.98424Z" />
+                                                                <path fillRule="evenodd" clipRule="evenodd" d="M10.7887 14.1084H5.38867C4.97467 14.1084 4.63867 13.7724 4.63867 13.3584C4.63867 12.9444 4.97467 12.6084 5.38867 12.6084H10.7887C11.2027 12.6084 11.5387 12.9444 11.5387 13.3584C11.5387 13.7724 11.2027 14.1084 10.7887 14.1084Z" />
+                                                                <path fillRule="evenodd" clipRule="evenodd" d="M8.7437 10.3564H5.3877C4.9737 10.3564 4.6377 10.0204 4.6377 9.60645C4.6377 9.19245 4.9737 8.85645 5.3877 8.85645H8.7437C9.1577 8.85645 9.4937 9.19245 9.4937 9.60645C9.4937 10.0204 9.1577 10.3564 8.7437 10.3564Z" />
+                                                            </svg>
+
+                                                            {selectedFile.name}
+                                                        </div>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                                            <path d="M12 16L11.4697 16.5303L12 17.0607L12.5303 16.5303L12 16ZM12.75 4C12.75 3.58579 12.4142 3.25 12 3.25C11.5858 3.25 11.25 3.58579 11.25 4L12.75 4ZM5.46967 10.5303L11.4697 16.5303L12.5303 15.4697L6.53033 9.46967L5.46967 10.5303ZM12.5303 16.5303L18.5303 10.5303L17.4697 9.46967L11.4697 15.4697L12.5303 16.5303ZM12.75 16L12.75 4L11.25 4L11.25 16L12.75 16Z" fill="white" />
+                                                            <path d="M5 21H19" stroke="white" stroke-width="1.5" />
+                                                        </svg>
+                                                    </div>
+                                       
+                                            <button
+                                                onClick={() => setSelectedFile(null)}
+                                                className="absolute top-[-3px] right-[-2px] border-2 border-white  bg-black text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                            >
+                                                <img
+                                                    loading="lazy"
+                                                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/8bbfb14016c67d4716e0a6366eed76fac938e5a78f6cba88c3ed041abcc52d72?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
+                                                    className="absolute w-[10px] h-[10px] object-contain z-50 "
+                                                />
+                                            </button>
                                         </div>
                                     )}
                                 </div>
                                 <button
                                     onClick={handleSendMessage}
-                                    className="bg-black text-white px-4 py-2 rounded-lg"
+                                    className="bg-black text-white px-2 py-2 rounded-lg"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42" fill="none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 42 42" fill="none">
                                         <path d="M38.5 13.6675V28.315C38.5 34.685 34.7025 38.4825 28.3325 38.4825H13.6675C7.2975 38.5 3.5 34.7025 3.5 28.3325V13.6675C3.5 7.2975 7.2975 3.5 13.6675 3.5H28.315C34.7025 3.5 38.5 7.2975 38.5 13.6675Z" fill="black" />
                                         <path d="M21.738 12.5352L27.6978 18.0963C28.1007 18.4722 28.1007 19.0944 27.6978 19.4704C27.295 19.8463 26.6281 19.8463 26.2253 19.4704L22.0437 15.5685V28.7778C22.0437 29.3093 21.5713 29.75 21.0017 29.75C20.4322 29.75 19.9598 29.3093 19.9598 28.7778V15.5685L15.7782 19.4704C15.3753 19.8463 14.7085 19.8463 14.3056 19.4704C14.0972 19.2759 14 19.0296 14 18.7833C14 18.537 14.1111 18.2778 14.3056 18.0963L20.2654 12.5352C20.4599 12.3537 20.7239 12.25 21.0017 12.25C21.2796 12.25 21.5435 12.3537 21.738 12.5352Z" fill="white" />
                                     </svg>
@@ -593,7 +655,12 @@ const Message = () => {
 
                             </div>
 
-                            {isPopupOpen && (
+
+
+
+                        </div>
+                        
+                        {isPopupOpen && (
                                 <PopupImage onClose={closePopup} content={popupImageSrc} />
                             )}
 
@@ -606,10 +673,6 @@ const Message = () => {
                                     files={infoFiles}
                                 />
                             )}
-
-
-
-                        </div>
 
 
                     </div>

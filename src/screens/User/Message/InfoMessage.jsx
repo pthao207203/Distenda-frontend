@@ -29,46 +29,37 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
             onClose && onClose();
         }
     };
-    const cornerImages = [
-        { src: "https://cdn.builder.io/api/v1/image/assets/TEMP/59b9819b2f8bcba5a532bac25a2a11282419b6aabd38e3a3bd70b97c7bbec430?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e", alt: "Top left decorative element" },
-        { src: "https://cdn.builder.io/api/v1/image/assets/TEMP/631194690e0d3936d5085113c8d86eb3414e79c243145ce47d95df9316e6e37e?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e", alt: "Top right decorative element" },
-        { src: "https://cdn.builder.io/api/v1/image/assets/TEMP/29ca412ec35dc720602a949c8cfc32eb796543795e2d5aa33c030019556c26ae?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9ce1976069f6b0e", alt: "Bottom left decorative element" },
-        { src: "https://cdn.builder.io/api/v1/image/assets/TEMP/37fc4790a46aa078c69f7f7e2592a3795899a59503c0ea27bb49607794680bdf?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e", alt: "Bottom right decorative element" },
-    ];
+    
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+        <div className="fixed top-0 object-contain inset-0 z-50 bg-none h-screen w-screen flex justify-center  items-center"
             onClick={handleClose}>
 
-            <div className="flex flex-col justify-between max-w-fit bg-black max-h-fit ">
+            <div className="flex flex-col bg-black justify-center max-w-fit min-w-[300px]  bg-opacity-50 backdrop-blur-[60px] max-h-[600px] max-w-full h-full px-[20px]">
+        
 
-                <div className="relative flex flex-wrap justify-between bg-none">
-                    {/* Hình ảnh góc trên bên trái */}
-                    <ImageWithShadow src={cornerImages[0].src} alt={cornerImages[0].alt} />
-
-                    {/* Hình ảnh góc trên bên phải và ảnh icon đóng */}
-                    <button className="relative">
-                        <ImageWithShadow src={cornerImages[1].src} alt={cornerImages[1].alt} />
+            <div className="">
+                    <button className="w-full">
+                        
                         <img
                             loading="lazy"
                             src="https://cdn.builder.io/api/v1/image/assets/TEMP/8bbfb14016c67d4716e0a6366eed76fac938e5a78f6cba88c3ed041abcc52d72?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
-                            className="absolute top-[20px] right-[20px] w-[20px] h-[20px] object-contain z-0"
+                            className="absolute top-[20px] right-[40px] w-[20px] h-[20px] object-contain z-50"
                             alt="Close icon"
                             onClick={handleClose} // Gọi hàm handleClose khi click vào icon
                         />
                     </button>
                 </div>
-
-                <div className="relative flex-col justify-start bg-none h-full p-[20px]">
+                <div className="relative flex-col justify-between bg-none h-fit px-[20px]">
                     <div className="flex flex-col justify-center items-center mb-[5px]">
                         <img
                             src={avatar || 'https://via.placeholder.com/150'}
                             alt="Avatar"
-                             className="rounded-full max-w-[100px] max-h-[100px] aspect-[1.04] max-md:w-[60px]  max-md:h-[60px] object-cover"
+                            className="rounded-full max-w-[80px] max-h-[80px] aspect-[1.04] max-md:w-[60px]  max-md:h-[60px] object-cover mb-[5px]"
                         />
-                        <p className="text-white mt-2 text-lg max-md:text-[13px] font-semibold">{userName || 'Người dùng'}</p>
+                        <p className="text-white mt-2  text-[1.25rem] max-md:text-[12px] font-semibold">{userName || 'Người dùng'}</p>
 
                     </div>
 
@@ -83,7 +74,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                     </div>
                     <div className="flex justify-center items-center w-full">
                         {showImages && (
-                            <div className="grid lg:grid-cols-4 max-lg:grid-cols-4 max-md:grid-cols-4 md:grid-cols-3 gap-2 overflow-y-auto overflow-hidden-scroll max-w-fit lg:max-h-[150px] max-md:h-[60px]">
+                            <div className="grid lg:grid-cols-5 max-lg:grid-cols-5 max-md:grid-cols-5 md:grid-cols-4 gap-2 overflow-y-auto overflow-hidden-scroll "style={{maxHeight: '110px'}}>
                                 {images && images.length > 0 ? (
                                     images.map((imgSrc, index) => (
                                         <img
@@ -91,7 +82,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                                             loading="lazy"
                                             src={imgSrc}
                                             alt={`Message Image ${index}`}
-                                           className="object-cover w-[100px] h-[100px] max-md:w-[50px] max-md:h-[50px] rounded-md shadow-lg cursor-pointer"
+                                            className="object-cover w-[80px] h-[80px] max-md:w-[50px] max-md:h-[50px] rounded-md shadow-lg cursor-pointer"
                                             onClick={() => setSelectedImgSrc(imgSrc)}
                                         />
                                     ))
@@ -101,7 +92,6 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                             </div>
                         )}
                     </div>
-
                     <div className="flex justify-between items-center cursor-pointer text-white max-md:text-[12px] mt-4 mb-2"
                         onClick={() => setShowFiles(!showFiles)}>
                         <span>File</span>
@@ -113,14 +103,14 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                     </div>
                     <div className="flex justify-center items-center w-full">
                         {showFiles && (
-                            <div className="flex flex-col gap-[10px] overflow-y-auto overflow-hidden-scroll w-full lg:max-h-[150px] max-lg:max-h-[100px] max-md:h-[60px]" >
+                            <div className="flex flex-col gap-[10px] overflow-y-auto overflow-hidden-scroll w-full" style={{maxHeight:'200px'}}>
                                 {files.length > 0 ? (
                                     files.map((file, index) => (
                                         <a
                                             key={index}
                                             href={file.fileUrl}
                                             download
-                                            className="text-black bg-gray-400 rounded-lg pt-[5px] pb-[5px] hover:underline"
+                                            className="text-black bg-white rounded-lg pt-[5px] pb-[5px] hover:underline"
                                         >
                                             <div className="flex justify-between px-[10px]">
                                                 <div className="flex items-center gap-[5px] max-md:text-[12px]">
@@ -151,15 +141,9 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                             </div>
                         )}
                     </div>
-
                 </div>
 
 
-
-                <div className="flex flex-wrap justify-between">
-                    <ImageWithShadow src={cornerImages[2].src} alt={cornerImages[2].alt} />
-                    <ImageWithShadow src={cornerImages[3].src} alt={cornerImages[3].alt} />
-                </div>
             </div>
             {selectedImgSrc && (
                 <PopupImage

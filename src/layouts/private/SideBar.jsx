@@ -21,6 +21,7 @@ const SideBar = ({ headerHeight }) => {
     { name: "Khóa học của tôi", link: "/courses/CoursePurchased" },
     { name: "Đang học", link: "/courses/CourseStudying" },
     { name: "Đã hoàn thành", link: "/courses/CourseCompleted" },
+    { name: "Chatbox AI", link: "/user/aichating" },
     { name: "Tin nhắn", link: "/user/message"},
   ];
 
