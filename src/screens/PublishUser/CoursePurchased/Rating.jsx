@@ -97,13 +97,13 @@ const ReviewSection = ({ setLoading, courseID, courseReview, has }) => {
 
   return (
     <div className="flex flex-col justify-center items-center mt-10 px-16 max-lg:px-0">
-      <div className="flex flex-col px-16 w-full text-3xl max-lg:text-[18px] font-semibold text-white max-lg:px-0 max-lg:max-w-full">
+      <div className="flex flex-col w-full text-3xl max-lg:text-[18px] font-semibold text-white max-lg:px-0 max-lg:max-w-full">
         <h2 className="max-lg:max-w-full">Đánh giá</h2>
         <div className="flex mt-2.5 w-full bg-slate-300 min-h-[2px] max-lg:max-w-full"></div>
       </div>
       <CourseReviews {...courseReview} />
       {has === 0 && (
-        <div className="justify-center items-center w-full max-w-[1542px]">
+        <div className="justify-center items-center w-full">
           <StarRating
             setSelectedStars={setSelectedStars}
             selectedStars={selectedStars}
