@@ -6,25 +6,34 @@ import { courseDetailController } from "../../../controllers/course.controller";
 import { getVideoStatusController } from "../../../controllers/user.controller";
 import { useParams } from "react-router-dom";
 import Rating from "./Rating";
+import { Helmet } from "react-helmet";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 export default function CourseDetailPage() {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   const [videoStatusList, setVideoStatusList] = useState({});
-  const [lessonRateMap,   setLessonRateMap]   = useState({});
+  const [lessonRateMap, setLessonRateMap] = useState({});
+  const [progressStatus, setProgressStatus] = useState(0);
   const { CourseSlug } = useParams();
-
+  const [showCertificate, setShowCertificate] = useState(false);
   useEffect(() => {
     if (!CourseSlug) return;
     (async () => {
       setLoading(true);
       try {
-        // 1) Lấy chi tiết khóa học
+        // Lấy chi tiết khóa học
         const detail = await courseDetailController(setLoading, CourseSlug);
         if (!detail) return;
-        setData(detail);
 
-        // 2) Lấy trạng thái video của khóa
+        // Lấy tiến trình khóa học
+        setData(detail);
+        const uc = detail.user?.UserCourse?.find(
+          (c) => c.CourseId === detail._id
+        );
+        setProgressStatus(uc?.CourseStatus ?? 0);
+
+        // Lấy trạng thái video của khóa
         const statusData = await getVideoStatusController(detail._id);
         const vidList = {};
         const rateMap = {};
@@ -36,7 +45,6 @@ export default function CourseDetailPage() {
         });
         setVideoStatusList(vidList);
         setLessonRateMap(rateMap);
-
       } catch (err) {
         console.error("Error in CourseDetailPage:", err);
       } finally {
@@ -47,6 +55,7 @@ export default function CourseDetailPage() {
   console.log("data", data);
   console.log("videoStatusList", videoStatusList);
   console.log("lessonRateMap", lessonRateMap);
+  console.log("progressStatus", progressStatus);
   return (
     <>
       <Helmet>
@@ -56,7 +65,7 @@ export default function CourseDetailPage() {
       {loading && <LoadingPopup />}
 
       <div className="flex overflow-hidden flex-col">
-        <CourseHeader {...data} onOpenCertificate={() => setShowCertificate(true)} />
+        <CourseHeader {...data} progressStatus={progressStatus} onOpenCertificate={() => setShowCertificate(true)} />
         <div className="flex z-10 flex-col lg:px-[6rem] mt-0 w-full bg-white bg-opacity-10 min-h-screen max-lg:mt-0 max-lg:px-[20px] max-lg:max-w-full">
           <CourseContent
             {...data}
@@ -81,5 +90,6 @@ export default function CourseDetailPage() {
       />
       )}
       </div>
+      </>
     );
 }

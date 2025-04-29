@@ -24,7 +24,7 @@ const ProfileForm = ({ data, setData, onSubmit }) => {
   };
 
   return (
-    <div className="flex flex-col px-[20px] pt-[20px] w-[600px] lg:max-w-[890px] min-h-[874px] max-md:mt-10 max-md:max-w-full">
+    <div className="flex flex-col px-[20px] pt-[20px] max-md:mt-10 max-md:max-w-full">
       <div className="flex flex-col w-full max-md:max-w-full">
         <div className="flex flex-col w-full text-white max-md:max-w-full">
           <label
@@ -130,7 +130,7 @@ const ProfileForm = ({ data, setData, onSubmit }) => {
                 : "https://cdn.builder.io/api/v1/image/assets/1914b3001bed44e2a53adf842ab19f47/d869b01bf44fd3d0d0a9d49750a7b186abf8eae62a9a4611c5d1a7e4b43f66b8?apiKey=1914b3001bed44e2a53adf842ab19f47&"
             }
             alt="eye icon"
-            className="object-contain self-stretch my-auto w-6 aspect-square cursor-pointer"
+            className="object-contain self-stretch my-auto lg:w-6 w-[14px] aspect-square cursor-pointer"
             onClick={() => togglePasswordVisibility("newPassword")}
           />
         </div>
@@ -161,7 +161,7 @@ const ProfileForm = ({ data, setData, onSubmit }) => {
                 : "https://cdn.builder.io/api/v1/image/assets/1914b3001bed44e2a53adf842ab19f47/d869b01bf44fd3d0d0a9d49750a7b186abf8eae62a9a4611c5d1a7e4b43f66b8?apiKey=1914b3001bed44e2a53adf842ab19f47&"
             }
             alt="eye icon"
-            className="object-contain self-stretch my-auto w-6 aspect-square cursor-pointer"
+            className="object-contain self-stretch my-auto lg:w-6 w-[14px] aspect-square cursor-pointer"
             onClick={() => togglePasswordVisibility("confirmPassword")}
           />
         </div>
