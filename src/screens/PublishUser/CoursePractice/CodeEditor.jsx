@@ -5,7 +5,7 @@ function CodeEditor(video) {
 
   return (
     <div className="flex flex-col flex-1 shrink px-2 basis-0 min-w-[240px] max-md:max-w-full">
-      <div className="flex flex-col w-full bg-black min-h-[calc(100vh-200px)] max-md:max-w-full">
+      <div className="flex flex-col w-full bg-black h-[calc(100vh-10rem)] max-md:max-w-full">
         {isIframe ? (
           <div
             className="flex items-center justify-center w-full h-full"

@@ -86,7 +86,7 @@ export const userMarkVideoCompletedService = async (data) => {
 // [GET] /user/video-status/:courseId
 export const getVideoStatusService = async (courseId) => {
   try {
-    const response = await fetch(`/user/video-status/${courseId}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/user/video-status/${courseId}`, {
       method: "GET",
       credentials: "include",
     });
