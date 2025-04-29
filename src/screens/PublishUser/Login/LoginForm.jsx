@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import LoginButton from "./LoginButton.jsx";
 import FacebookLoginButton from "./FacebookLoginButton.jsx";
 
@@ -26,11 +26,11 @@ function LoginForm({ setLoading, onForgotPassword }) {
         { withCredentials: true }
       );
       if (res.data.code === 200) {
-        Cookies.set('user_token', res.data.user.UserToken, {
-          expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
-          path: '/',  // cookie có hiệu lực toàn site
-          sameSite: 'Lax' // tăng bảo mật, tránh CSRF
-        });
+        // Cookies.set('user_token', res.data.user.UserToken, {
+        //   expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
+        //   path: '/',  // cookie có hiệu lực toàn site
+        //   sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+        // });
         navigate("/");
       } else {
         setError(res.data.message);
@@ -60,10 +60,10 @@ function LoginForm({ setLoading, onForgotPassword }) {
         { withCredentials: true }
       );
       if (res.data.code === 200) {
-        Cookies.set('user_token', res.data.user, {
+        Cookies.set("user_token", res.data.user, {
           expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
-          path: '/',  // cookie có hiệu lực toàn site
-          sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+          path: "/", // cookie có hiệu lực toàn site
+          sameSite: "Lax", // tăng bảo mật, tránh CSRF
         });
         navigate("/");
       } else {

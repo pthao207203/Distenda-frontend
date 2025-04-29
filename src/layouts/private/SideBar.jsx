@@ -80,7 +80,7 @@ const SideBar = ({ headerHeight }) => {
           try {
             // Gọi API để lấy thông báo của user thông qua userToken
             const notifications = await getNotificationsByUser(userToken);
-            console.log("notifications", notifications);
+            // console.log("notifications", notifications);
 
             // Kiểm tra xem thông báo này đã được gửi chưa
             const hasAlreadySent = notifications.some(
