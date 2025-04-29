@@ -4,17 +4,19 @@ import LessonList from "./LessonList";
 import CodeEditor from "./CodeEditor";
 import { useParams } from "react-router-dom";
 import { videoController } from "../../../controllers/video.controller";
-import { userMarkVideoCompletedController, getVideoStatusController } from "../../../controllers/user.controller";
+import {
+  userMarkVideoCompletedController,
+  getVideoStatusController,
+} from "../../../controllers/user.controller";
 import { Helmet } from "react-helmet";
 import LoadingPopup from "../../../components/LoadingPopup";
-import Loading from "../../../components/Loading";
 
 function CourseLayout() {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   const { VideoSlug } = useParams();
   const [videoStatusList, setVideoStatusList] = useState({});
-  const [lessonRateMap,   setLessonRateMap]   = useState({});
+  const [lessonRateMap, setLessonRateMap] = useState({});
 
   // 1) Lấy trạng thái video & tỉ lệ hoàn thành từng lesson
   const fetchVideoStatuses = async (courseId) => {
@@ -61,14 +63,12 @@ function CourseLayout() {
         videoId,
       });
       if (resp) {
-        setVideoStatusList(prev => ({ ...prev, [videoId]: 1 }));
+        setVideoStatusList((prev) => ({ ...prev, [videoId]: 1 }));
       }
     } catch (err) {
       console.error(err);
     }
   };
-
-  if (loading) return <Loading />;
 
   return (
     <>
