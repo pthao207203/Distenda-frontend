@@ -1,0 +1,76 @@
+/* Import font chỉ trong chứng chỉ */
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:wght@700&family=Montserrat:wght@600&display=swap');
+
+/* Reset nhẹ cho chứng chỉ */
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Các style chính cho chứng chỉ */
+.frame {
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.frame .div {
+  background-image: url(https://c.animaapp.com/wAumXPuT/img/1-21.png);
+  background-size: cover;
+  background-position: 50% 50%;
+  width: 1440px;
+  height: 1018px;
+  position: relative;
+}
+
+/* Font cho tên học viên */
+.frame .text-wrapper {
+  position: absolute;
+  top: 410px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Alex Brush', cursive;
+  font-weight: 400;
+  color: #ffffff;
+  font-size: 70px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+/* Font cho tên khóa học */
+.frame .p {
+  position: absolute;
+  top: 574px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  color: #000000;
+  font-size: 30px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* Font cho tên giảng viên */
+.frame .text-wrapper-2 {
+  position: absolute;
+  top: 785px;
+  left: 30%;
+  transform: translateX(-40%);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  color: #a86204;
+  font-size: 25px;
+  letter-spacing: 0;
+  line-height: normal;
+  text-transform: uppercase;
+}
