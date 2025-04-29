@@ -1,6 +1,9 @@
 import * as React from "react";
 
-export default function CoursesInfo(course) {
+export default function CoursesInfo(course, user) {
+  const { onOpenCertificate } = course; 
+  console.log("Course:", course);
+
   let lessons = [];
 
   // Kiểm tra xem course.lesson có tồn tại và là một đối tượng hay mảng
@@ -34,9 +37,14 @@ export default function CoursesInfo(course) {
           <div className="flex flex-col self-stretch my-auto mr-0  w-full max-lg:mt-10 max-lg:max-w-full">
             <div className="flex gap-3 justify-center items-center px-3 py-2 max-w-full lg:text-[1.25rem] text-[16px] font-medium leading-none bg-[#CFF500] border-2 border-black border-solid min-h-[40px] shadow-[-6px_6px_0px_rgba(255,255,255,1)] text-neutral-900 w-[100px]">
               <div className="gap-2.5 self-stretch my-auto">
-                {courseDetails.type}
+                { course.status !== 0 ? (
+                  <button onClick={onOpenCertificate}>Xem chứng chỉ</button>
+                ) : (
+                  courseDetails.type
+                )}
               </div>
             </div>
+
             <div className="flex flex-col mt-4 max-lg:mt-[20px] w-full text-white max-lg:max-w-full ">
               <div className="flex flex-col w-full max-lg:max-w-full">
                 <h2 className="flex-1 shrink gap-2.5 lg:pt-3 max-lg:pt-[16px] w-full lg:text-[1.875rem] text-[20px] font-bold max-lg:max-w-full">
@@ -52,6 +60,7 @@ export default function CoursesInfo(course) {
             </div>
           </div>
         </div>
+
         <div className="flex flex-col max-lg:w-full self-left justify-center">
           <img
             loading="lazy"
