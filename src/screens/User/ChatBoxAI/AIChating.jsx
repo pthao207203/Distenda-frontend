@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { marked } from "marked";
 import ChatArea from "./ChatArea";
@@ -13,18 +13,18 @@ function AIChating() {
   const [currentUser, setCurrentUser] = useState(null);
   const [globalContext, setGlobalContext] = useState("");
 
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  // const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   // Lấy thông tin user và context khi mở ChatBot
   useEffect(() => {
     const initChatbot = async () => {
       try {
-        const resUser = await axios.get(`${API_BASE_URL}/user/me`, {
+        const resUser = await axios.get(`${process.env.REACT_APP_API_BASE_URLL}/user/me`, {
           withCredentials: true,
         });
         setCurrentUser(resUser.data);
 
-        const resContext = await axios.get(`${API_BASE_URL}/site-context`);
+        const resContext = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/site-context`);
         setGlobalContext(resContext.data);
       } catch (err) {
         console.error("Lỗi khởi tạo chatbot:", err);
@@ -49,11 +49,6 @@ function AIChating() {
     const lowerCaseMsg = newMessage.message.toLowerCase();
 
     // Kiểm tra câu hỏi về phương thức thanh toán
-    const paymentMethodKeywords = [
-      "phương thức thanh toán",
-      "cách thanh toán",
-      "hỗ trợ thanh toán",
-    ];
     const isPaymentMethodQuestion = (
       lowerCaseMsg.includes("phương thức") && lowerCaseMsg.includes("thanh toán")
    ) || (
