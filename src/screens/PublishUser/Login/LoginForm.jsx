@@ -26,11 +26,11 @@ function LoginForm({ setLoading, onForgotPassword }) {
         { withCredentials: true }
       );
       if (res.data.code === 200) {
-        // Cookies.set('user_token', res.data.user.UserToken, {
-        //   expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
-        //   path: '/',  // cookie có hiệu lực toàn site
-        //   sameSite: 'Lax' // tăng bảo mật, tránh CSRF
-        // });
+        Cookies.set('user_token', res.data.user, {
+          expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
+          path: '/',  // cookie có hiệu lực toàn site
+          sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+        });
         navigate("/");
       } else {
         setError(res.data.message);
@@ -95,6 +95,8 @@ function LoginForm({ setLoading, onForgotPassword }) {
     loginController(formData, setSuccess, setError, navigate);
     setLoading(false);
   };
+
+  
 
   return (
     <div className="flex z-0 flex-col w-full max-lg:max-w-full max-lg:p-[20px]">

@@ -19,7 +19,7 @@ function AIChating() {
   useEffect(() => {
     const initChatbot = async () => {
       try {
-        const resUser = await axios.get(`${process.env.REACT_APP_API_BASE_URLL}/user/me`, {
+        const resUser = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/user/me`, {
           withCredentials: true,
         });
         setCurrentUser(resUser.data);
@@ -49,6 +49,11 @@ function AIChating() {
     const lowerCaseMsg = newMessage.message.toLowerCase();
 
     // Kiểm tra câu hỏi về phương thức thanh toán
+    // const paymentMethodKeywords = [
+    //   "phương thức thanh toán",
+    //   "cách thanh toán",
+    //   "hỗ trợ thanh toán",
+    // ];
     const isPaymentMethodQuestion = (
       lowerCaseMsg.includes("phương thức") && lowerCaseMsg.includes("thanh toán")
    ) || (
