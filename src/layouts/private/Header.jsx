@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { headerController } from "../../controllers/home.controller";
-import Loading from "../../components/Loading";
 
 export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
   const [activeLink, setActiveLink] = useState("");
@@ -21,10 +20,10 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
     category: [],
     setting: [],
   });
-  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
-      const result = await headerController(setLoading);
+      const result = await headerController();
       // console.log("result", result)
       setData(result);
     }
@@ -50,18 +49,12 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
     }
   }, [location.pathname]);
 
-  if (loading) {
-    return <Loading />;
-  }
-  // console.log("category ", data.category)
-  // console.log("setting ", data.setting)
-
   return (
     <header
       ref={headerRef}
       className="bg-[url('/Image/BG.png')] bg-cover bg-center bg-fixed fixed top-0 left-0 w-full z-50 backdrop-blur-[40px] max-lg:pl-[20px]"
     >
-      <div className="flex items-start justify-center px-[20px] py-3 text-white lg:gap-5">
+      <div className="flex items-start justify-center px-[1.25rem] py-3 text-white lg:gap-5">
         {/* Logo */}
         <div
           style={{ flexBasis: "auto", textAlign: "center" }}
@@ -124,7 +117,7 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
                   : "https://cdn.builder.io/api/v1/image/assets/9c7992bcbe164b8dad4f2629b8fc1688/2b926db059289d5c08128dea3316455c4081d26d19035d156f09a2e2fbe1385b?apiKey=9c7992bcbe164b8dad4f2629b8fc1688&"
               }
               alt=""
-              className="object-cover shrink-0 w-[4rem] max-lg:w-[30px] rounded-full aspect-square"
+              className="object-cover shrink-0 w-[4rem] max-lg:w-[24px] rounded-full aspect-square"
             />
             <img
               loading="lazy"

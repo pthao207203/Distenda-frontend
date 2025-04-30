@@ -120,7 +120,7 @@ const ProfileForm = ({ data, setData, onSubmit }) => {
             value={data?.newPassword || ""}
             onChange={handleChange} // Update the state and data
             autoComplete="off"
-            className="flex-1 bg-transparent border-none outline-none text-white"
+            className="flex-1 bg-transparent border-none outline-none text-white text-[14px] lg:text-[1.25rem]"
           />
           <img
             loading="lazy"
@@ -151,7 +151,7 @@ const ProfileForm = ({ data, setData, onSubmit }) => {
             value={data?.confirmPassword || ""}
             onChange={handleChange} // Update the state and data
             autoComplete="off"
-            className="flex-1 bg-transparent border-none outline-none text-white"
+            className="flex-1 bg-transparent border-none outline-none text-white text-[14px] lg:text-[1.25rem]"
           />
           <img
             loading="lazy"
