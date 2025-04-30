@@ -4,7 +4,6 @@ import Cookies from "js-cookie";
 import { getNotificationsByUser } from '../../../services/notification.service';
 import { io } from "socket.io-client"; // 👉 import socket
 
-const filters = ["Mới nhất", "Cũ nhất", "Đã đọc", "Chưa đọc"];
 
 const socket = io(process.env.REACT_APP_SOCKET_URL || "http://localhost:3001", {
   withCredentials: true,
