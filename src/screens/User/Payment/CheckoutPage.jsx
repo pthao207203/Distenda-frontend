@@ -23,6 +23,24 @@ export default function CheckoutPage({ onClose, ...course }) {
     phone: `${course?.user?.UserPhone || ""}`,
   };
 
+  const handleZaloPay = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3001/pay/${course.CourseSlug}/zalopay`,
+        {},
+        { withCredentials: true }
+      );
+      if (response.data.code === 200) {
+        window.location.href = response.data.payUrl;
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Lỗi thanh toán ZaloPay:", error);
+      alert("Thanh toán ZaloPay thất bại, vui lòng thử lại!");
+    }
+  };
+
   const handlePayment = async () => {
     try {
       const response = await axios.post(
@@ -79,6 +97,27 @@ export default function CheckoutPage({ onClose, ...course }) {
         >
           <span>Đăng ký</span>
         </button>
+        <button
+          onClick={handleZaloPay}
+          className="flex gap-3 justify-center items-center self-center px-3 py-4 mt-3 text-xl max-lg:text-[14px] font-medium text-white bg-neutral-900 w-[272px]"
+        >
+          Thanh toán ZaloPay
+        </button>
+        {/* <div className="flex flex-col items-center mt-4 gap-4">
+          <button
+            onClick={handlePayment} // MoMo
+            className="flex gap-3 justify-center items-center px-3 py-4 text-xl font-medium text-white bg-neutral-900 w-[272px]"
+          >
+            Thanh toán MoMo
+          </button>
+
+          <button
+            onClick={handleZaloPay} // ZaloPay
+            className="flex gap-3 justify-center items-center px-3 py-4 text-xl font-medium text-white bg-[#00b5f1] w-[272px]"
+          >
+            Thanh toán ZaloPay
+          </button>
+        </div> */}
       </div>
     </main>
   );
