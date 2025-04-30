@@ -5,7 +5,6 @@ import CourseSection from "./CourseSection";
 import CourseNavigation from "./CourseNavigation";
 import InstructorProfile from "./InstructorProfile";
 import CourseStats from "./CourseStats";
-import LearningOutcomes from "./LearningOutcomes";
 import CourseLessons from "./CourseLessons";
 import CourseReviews from "./CourseReviews";
 import CourseCard from "./CourseCard";
@@ -71,11 +70,11 @@ export default function CourseContent({ onRegister, headerHeight, ...course }) {
 
   return (
     <main className="flex flex-col shrink relative text-white items-start w-full bg-white/15 backdrop-blur-[30px] max-ms:px-4 max-ms:max-w-full overflow-x-hidden">
-      <div className="hidden lg:block">
+      <div className="hidden lg:block w-full">
         <CourseOverview {...course} />
       </div>
 
-      <aside className="absolute flex flex-col z-10 ml-5 items-center justify-end w-1/4 max-lg:w-full max-lg:relative max-lg:ml-0 lg:right-0 max-lg:mb-10">
+      <aside className="absolute flex flex-col z-10 ml-5 items-center justify-end w-1/4 max-lg:w-full max-lg:relative max-lg:ml-0 lg:right-12 max-lg:mb-10">
         <CourseCard {...course} onRegister={onRegister} />{" "}
         {/* Truyền hàm mở Payment */}
       </aside>

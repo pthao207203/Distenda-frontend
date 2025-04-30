@@ -13,6 +13,7 @@ const socket = io(process.env.REACT_APP_SOCKET_URL || "http://localhost:3001", {
 function NotificationsPage() {
   const [dynamicNotifications, setDynamicNotifications] = useState([]);
 
+
   useEffect(() => {
     const fetchNotifications = async () => {
       const token = Cookies.get('user_token');
@@ -38,6 +39,7 @@ function NotificationsPage() {
         }
       }
     };
+
 
     fetchNotifications();
 

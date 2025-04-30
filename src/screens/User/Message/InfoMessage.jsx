@@ -1,27 +1,24 @@
-import React from 'react';
-import PopupImage from './PopupImage';
-import './Message.css';
+import React from "react";
+import PopupImage from "./PopupImage";
+import "./Message.css";
 
 // Component để hiển thị hình ảnh với bóng đổ
-function ImageWithShadow({ src, alt }) {
-    return (
-        <img
-            loading="lazy"
-            src={src}
-            alt={alt}
-            className="object-contain shrink-0 bg-none w-[60px]"
-        />
-    );
-}
-
+// function ImageWithShadow({ src, alt }) {
+//   return (
+//     <img
+//       loading="lazy"
+//       src={src}
+//       alt={alt}
+//       className="object-contain shrink-0 bg-none w-[60px]"
+//     />
+//   );
+// }
 
 function InfoMessage({ onClose, avatar, userName, images, files }) {
-    const [isOpen, setIsOpen] = React.useState(true);
-    const [selectedImgSrc, setSelectedImgSrc] = React.useState(null);
-    const [showImages, setShowImages] = React.useState(true);
-    const [showFiles, setShowFiles] = React.useState(true);
-
-
+  const [isOpen, setIsOpen] = React.useState(true);
+  const [selectedImgSrc, setSelectedImgSrc] = React.useState(null);
+  const [showImages, setShowImages] = React.useState(true);
+  const [showFiles, setShowFiles] = React.useState(true);
 
     const handleClose = (e) => {
         if (e.target === e.currentTarget) {
@@ -31,7 +28,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
     };
     
 
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
     return (
         <div className="fixed top-0 object-contain inset-0 z-50 bg-none h-screen w-screen flex justify-center  items-center"
@@ -81,7 +78,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                                             key={index}
                                             loading="lazy"
                                             src={imgSrc}
-                                            alt={`Message Image ${index}`}
+                                            alt={`Message ${index}`}
                                             className="object-cover w-[80px] h-[80px] max-md:w-[50px] max-md:h-[50px] rounded-md shadow-lg cursor-pointer"
                                             onClick={() => setSelectedImgSrc(imgSrc)}
                                         />

@@ -7,11 +7,13 @@ import { categoryController } from "../../../controllers/category.controller";
 //import TestimonialSection from "./TestimonialSection"; // Import TestimonialSection
 //import TeacherSection from "./TeacherSection"; // Import TeacherSection
 import Banner from "../Course/Banner";
-import Loading from "../../../components/Loading";
+import { Helmet } from "react-helmet";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 function CategoryPage() {
   const [allCourses, setAllCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
+  const [category, setCategory] = useState(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +23,9 @@ function CategoryPage() {
     async function fetchData(categorySlug) {
       const result = await categoryController(setLoading, categorySlug);
       if (result) {
-        setAllCourses(result);    // Dữ liệu gốc
-        setFilteredCourses(result);  // Ban đầu hiển thị toàn bộ
+        setAllCourses(result.courses); // Dữ liệu gốc
+        setFilteredCourses(result.courses); // Ban đầu hiển thị toàn bộ
+        setCategory(result.category);
       }
     }
 
@@ -33,48 +36,47 @@ function CategoryPage() {
 
   const handleSearch = (keyword) => {
     const lowerKeyword = keyword.toLowerCase();
-    const filtered = allCourses.filter(course =>
+    const filtered = allCourses.filter((course) =>
       course.CourseName.toLowerCase().includes(lowerKeyword)
     );
     setFilteredCourses(filtered);
   };
 
-  if (loading) {
-    return (
-      <Loading />
-    )
-  }
-  // console.log("courses => ", data)
+  console.log("courses => ", allCourses);
 
   return (
-    <div className="flex flex-col w-full min-h-screen">
-      {/* Nội dung chính */}
-      <main>
-        <div className="max-w-full flex flex-col items-center w-full px-5 pt-12 pb-20 bg-white bg-opacity-10 backdrop-blur-[10px]">
-          {/* Thanh tìm kiếm */}
-          <SearchBar onSearch={handleSearch} />
-          <Banner />
+    <>
+      <Helmet>
+        <title>{category ? category : "Danh mục"}</title>
+      </Helmet>
 
-          {/* Khu vực chứa các thẻ */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[24px] mt-10 w-full">
-            {filteredCourses.length > 0 ? (
-              filteredCourses.map((course) => (
-                <CourseCard key={course._id} {...course} />
-              ))
-            ) : (
-              <div className="text-white">Không tìm thấy khóa học nào</div>
-            )}
-          </div>
+      {loading && <LoadingPopup />}
+      <div className="flex flex-col w-full min-h-screen">
+        {/* Nội dung chính */}
+        <main>
+          <div className="max-w-full flex flex-col items-center w-full px-5 pt-12 pb-20 bg-white bg-opacity-10 backdrop-blur-[10px]">
+            {/* Thanh tìm kiếm */}
+            <SearchBar onSearch={handleSearch} />
+            <Banner />
 
+            {/* Khu vực chứa các thẻ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[24px] mt-10 w-full">
+              {filteredCourses.length > 0 ? (
+                filteredCourses.map((course) => (
+                  <CourseCard key={course._id} {...course} />
+                ))
+              ) : (
+                <div className="text-white">Không tìm thấy khóa học nào</div>
+              )}
+            </div>
 
-
-
-          {/* Thêm TestimonialSection và TeacherSection 
+            {/* Thêm TestimonialSection và TeacherSection 
           <TestimonialSection />
           <TeacherSection />*/}
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
 

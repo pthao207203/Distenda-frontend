@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
-import './Message.css';
-import uploadImage from '../../../components/UploadImage';
-import uploadFile from '../../../components/UploadFile';
-import PopupImage from './PopupImage';
-import InfoMessage from './InfoMessage';
+import "./Message.css";
+import uploadImage from "../../../components/UploadImage";
+import uploadFile from "../../../components/UploadFile";
+import PopupImage from "./PopupImage";
+import InfoMessage from "./InfoMessage";
 import {
     loadInstructors,
     loadMessages,
@@ -14,9 +14,7 @@ import {
 } from '../../../controllers/message.controller';
 import { getMessages } from '../../../services/message.service';
 import { io } from "socket.io-client";
-const socket = io('http://localhost:3001');
-
-
+const socket = io(`${process.env.REACT_APP_API_BASE_URL}`);
 
 const Message = () => {
     const [instructors, setInstructors] = useState([]);
@@ -39,108 +37,112 @@ const Message = () => {
 
 
 
-    const openInfoMessagePopup = () => {
-        if (message.length > 0) {
-            const images = message
-                .filter(msg => msg.image)
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))   // Sắp xếp từ mới -> cũ
-                .map(msg => msg.image);   // Lấy đường dẫn ảnh
-            setInfoImages(images);
-            const files = message
-                .filter(msg => msg.file && msg.file.fileUrl)
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))   // Mới -> cũ
-                .map(msg => ({
-                    fileName: msg.file.fileName,
-                    fileUrl: msg.file.fileUrl
-                }));
-            setInfoFiles(files);
+  const openInfoMessagePopup = () => {
+    if (message.length > 0) {
+      const images = message
+        .filter((msg) => msg.image)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sắp xếp từ mới -> cũ
+        .map((msg) => msg.image); // Lấy đường dẫn ảnh
+      setInfoImages(images);
+      const files = message
+        .filter((msg) => msg.file && msg.file.fileUrl)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Mới -> cũ
+        .map((msg) => ({
+          fileName: msg.file.fileName,
+          fileUrl: msg.file.fileUrl,
+        }));
+      setInfoFiles(files);
+    }
+    setIsInfoMessagePopupOpen(true);
+  };
+
+  const closeInfoMessagePopup = () => {
+    setIsInfoMessagePopupOpen(false);
+  };
+
+  const openPopup = (imgSrc) => {
+    setPopupImageSrc(imgSrc);
+    setIsPopupOpen(true);
+  };
+
+  const closePopup = () => {
+    setIsPopupOpen(false);
+    setPopupImageSrc(null);
+  };
+
+  // 🔁 Load instructors khi vừa mở component
+  useEffect(() => {
+    loadInstructors(token, (data) => setInstructors(data || []));
+  }, [token]);
+
+  // 🔁 Khi instructors đã có, load tất cả tin nhắn để hiển thị ở sidebar
+  useEffect(() => {
+    if (instructors.length > 0) {
+      const fetchAllMessages = async () => {
+        const groupedMessages = {};
+        for (const instructor of instructors) {
+          const res = await loadMessages(instructor.instructorId, token);
+          if (res?.success) {
+            groupedMessages[instructor.instructorId] = res.data;
+          }
         }
-        setIsInfoMessagePopupOpen(true);
-    };
+        setMessagesByInstructor(groupedMessages);
 
+        // 👉 Tự động chọn người nhắn gần nhất
+        const latest = Object.entries(groupedMessages)
+          .flatMap(([instructorId, msgs]) =>
+            msgs.length > 0
+              ? [
+                  {
+                    instructorId,
+                    latestTime: new Date(msgs[msgs.length - 1].createdAt),
+                  },
+                ]
+              : []
+          )
+          .sort((a, b) => b.latestTime - a.latestTime)[0];
 
-    const closeInfoMessagePopup = () => {
-        setIsInfoMessagePopupOpen(false);
-    };
-
-    const openPopup = (imgSrc) => {
-        setPopupImageSrc(imgSrc);
-        setIsPopupOpen(true);
-    };
-
-    const closePopup = () => {
-        setIsPopupOpen(false);
-        setPopupImageSrc(null);
-    };
-
-
-    // 🔁 Load instructors khi vừa mở component
-    useEffect(() => {
-        loadInstructors(token, (data) => setInstructors(data || []));
-    }, [token]);
-
-    // 🔁 Khi instructors đã có, load tất cả tin nhắn để hiển thị ở sidebar
-    useEffect(() => {
-        if (instructors.length > 0) {
-            const fetchAllMessages = async () => {
-                const groupedMessages = {};
-                for (const instructor of instructors) {
-                    const res = await loadMessages(instructor.instructorId, token);
-                    if (res?.success) {
-                        groupedMessages[instructor.instructorId] = res.data;
-                    }
-                }
-                setMessagesByInstructor(groupedMessages);
-
-                // 👉 Tự động chọn người nhắn gần nhất
-                const latest = Object.entries(groupedMessages)
-                    .flatMap(([instructorId, msgs]) =>
-                        msgs.length > 0
-                            ? [{ instructorId, latestTime: new Date(msgs[msgs.length - 1].createdAt) }]
-                            : []
-                    )
-                    .sort((a, b) => b.latestTime - a.latestTime)[0];
-
-                if (latest) {
-                    // Nếu có tin nhắn mới, chọn giảng viên theo tin nhắn mới nhất
-                    const matchedInstructor = instructors.find(ins => ins.instructorId === latest.instructorId);
-                    if (matchedInstructor) {
-                        setSelectedInstructor(matchedInstructor);
-                        setMessages(groupedMessages[latest.instructorId]);
-                        updateMessageStatus(latest.instructorId);
-                    }
-                } else {
-                    // Nếu không có tin nhắn nào, chọn đại một giảng viên từ danh sách instructors
-                    const firstInstructor = instructors[0]; // Chọn giảng viên đầu tiên trong danh sách
-                    if (firstInstructor) {
-                        setSelectedInstructor(firstInstructor);
-                        setMessages(groupedMessages[firstInstructor.instructorId] || []); // Lấy tin nhắn của giảng viên đầu tiên
-                    }
-                }
-            };
-            fetchAllMessages();
+        if (latest) {
+          // Nếu có tin nhắn mới, chọn giảng viên theo tin nhắn mới nhất
+          const matchedInstructor = instructors.find(
+            (ins) => ins.instructorId === latest.instructorId
+          );
+          if (matchedInstructor) {
+            setSelectedInstructor(matchedInstructor);
+            setMessages(groupedMessages[latest.instructorId]);
+            updateMessageStatus(latest.instructorId);
+          }
+        } else {
+          // Nếu không có tin nhắn nào, chọn đại một giảng viên từ danh sách instructors
+          const firstInstructor = instructors[0]; // Chọn giảng viên đầu tiên trong danh sách
+          if (firstInstructor) {
+            setSelectedInstructor(firstInstructor);
+            setMessages(groupedMessages[firstInstructor.instructorId] || []); // Lấy tin nhắn của giảng viên đầu tiên
+          }
         }
-    }, [instructors, token]);
+      };
+      fetchAllMessages();
+    }
+  }, [instructors, token]);
 
-    // 📤 Gửi tin nhắn
-    const handleSendMessage = async () => {
-        if (!newMessage && !selectedImage && !selectedFile) return;
-        if (!selectedInstructor) return;
+  // 📤 Gửi tin nhắn
+  const handleSendMessage = async () => {
+    if (!newMessage && !selectedImage && !selectedFile) return;
+    if (!selectedInstructor) return;
 
-        let uploadedImageUrl = null;
-        let uploadedFileData = null;
+    let uploadedImageUrl = null;
+    let uploadedFileData = null;
 
-        if (selectedImage) {
-            uploadedImageUrl = await uploadImage(selectedImage);
-        }
-        if (selectedFile) {
-            const fileUrl = await uploadFile(selectedFile);
-            uploadedFileData = {
-                fileName: selectedFile.name,
-                fileUrl: fileUrl
-            };
-        }
-
+    if (selectedImage) {
+      uploadedImageUrl = await uploadImage(selectedImage);
+    }
+    if (selectedFile) {
+      const fileUrl = await uploadFile(selectedFile);
+      uploadedFileData = {
+        fileName: selectedFile.name,
+        fileUrl: fileUrl,
+      };
+    }
 
         const tempMessage = {
             content: newMessage,
@@ -160,12 +162,16 @@ const Message = () => {
             uploadImagePreviewRef.current.src = "";
         }
 
-        setMessagesByInstructor(prev => {
-            const updated = { ...prev };
-            if (!updated[selectedInstructor.instructorId]) updated[selectedInstructor.instructorId] = [];
-            updated[selectedInstructor.instructorId] = [...updated[selectedInstructor.instructorId], tempMessage];
-            return updated;
-        });
+    setMessagesByInstructor((prev) => {
+      const updated = { ...prev };
+      if (!updated[selectedInstructor.instructorId])
+        updated[selectedInstructor.instructorId] = [];
+      updated[selectedInstructor.instructorId] = [
+        ...updated[selectedInstructor.instructorId],
+        tempMessage,
+      ];
+      return updated;
+    });
 
         // 2️⃣ Gửi lên server
         const messageData = {
@@ -176,65 +182,63 @@ const Message = () => {
             file: uploadedFileData || {}
         };
 
+    setNewMessage("");
+    setSelectedImage(null);
+    setSelectedFile(null);
+    if (uploadImagePreviewRef.current) {
+      uploadImagePreviewRef.current.src = "";
+    }
 
-        setNewMessage('');
-        setSelectedImage(null);
-        setSelectedFile(null);
-        if (uploadImagePreviewRef.current) {
-            uploadImagePreviewRef.current.src = "";
-        }
+    await sendMessage(messageData, (sentMsg) => {
+      socket.emit("sendMessage", sentMsg);
+      setMessages((prev) =>
+        prev.map((msg) => (msg === tempMessage ? sentMsg : msg))
+      );
 
-        await sendMessage(messageData, (sentMsg) => {
-            socket.emit('sendMessage', sentMsg);
-            setMessages(prev => prev.map(msg =>
-                msg === tempMessage ? sentMsg : msg
-            ));
+      setMessagesByInstructor((prev) => {
+        const updated = { ...prev };
+        updated[selectedInstructor.instructorId] = updated[
+          selectedInstructor.instructorId
+        ].map((msg) => (msg === tempMessage ? sentMsg : msg));
+        return updated;
+      });
+    });
+  };
 
-            setMessagesByInstructor(prev => {
-                const updated = { ...prev };
-                updated[selectedInstructor.instructorId] = updated[selectedInstructor.instructorId].map(msg =>
-                    msg === tempMessage ? sentMsg : msg
-                );
-                return updated;
-            });
-        });
-    };
+  // 📂 Upload ảnh (chưa xử lý)
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageURL = URL.createObjectURL(file);
+      setSelectedImage(file);
+      setPreviewImageUrl(imageURL);
 
-    // 📂 Upload ảnh (chưa xử lý)
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const imageURL = URL.createObjectURL(file);
-            setSelectedImage(file);
-            setPreviewImageUrl(imageURL);
+      if (uploadImagePreviewRef.current) {
+        uploadImagePreviewRef.current.src = imageURL;
+      }
+    }
+  };
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
 
-            if (uploadImagePreviewRef.current) {
-                uploadImagePreviewRef.current.src = imageURL;
-            }
-        }
+  // ✅ Khi chọn 1 giáo viên
+  const handleSelectInstructor = async (teacher) => {
+    setSelectedInstructor(teacher);
+    setMessages([]); // 👈 Xoá ngay toàn bộ tin nhắn cũ
 
-    };
-    const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-        }
-    };
+    try {
+      // 🟡 Chờ tin nhắn mới từ backend
+      const res = await getMessages(teacher.instructorId, token);
+      if (res.success) {
+        setMessages(res.data); // 👉 Cập nhật tin nhắn với người mới
+      }
 
-    // ✅ Khi chọn 1 giáo viên
-    const handleSelectInstructor = async (teacher) => {
-        setSelectedInstructor(teacher);
-        setMessages([]); // 👈 Xoá ngay toàn bộ tin nhắn cũ
-
-        try {
-            // 🟡 Chờ tin nhắn mới từ backend
-            const res = await getMessages(teacher.instructorId, token);
-            if (res.success) {
-                setMessages(res.data); // 👉 Cập nhật tin nhắn với người mới
-            }
-
-            // ✅ Đánh dấu tin nhắn là đã đọc
-            await updateMessageStatus(teacher.instructorId);
+      // ✅ Đánh dấu tin nhắn là đã đọc
+      await updateMessageStatus(teacher.instructorId);
 
             // 🔄 Cập nhật lại messagesByInstructor
             setMessagesByInstructor(prev => {
@@ -257,34 +261,32 @@ const Message = () => {
         }
     }, [message]);
 
-    useEffect(() => {
-        socket.on('receiveMessage', (data) => {
-            const senderId = data.sender?.userId;
-            if (!senderId) return;  // Nếu không có senderId thì bỏ qua
+  useEffect(() => {
+    socket.on("receiveMessage", (data) => {
+      const senderId = data.sender?.userId;
+      if (!senderId) return; // Nếu không có senderId thì bỏ qua
 
-            if (selectedInstructor && senderId === selectedInstructor.instructorId) {
-                setMessages(prev => [...prev, data]);
-            }
-            if (data.type === 'image') {
-                // Thêm vào tin nhắn với ảnh
-                setMessages(prev => [...prev, data]);
-            }
+      if (selectedInstructor && senderId === selectedInstructor.instructorId) {
+        setMessages((prev) => [...prev, data]);
+      }
+      if (data.type === "image") {
+        // Thêm vào tin nhắn với ảnh
+        setMessages((prev) => [...prev, data]);
+      }
 
+      setMessagesByInstructor((prev) => {
+        const updated = { ...prev };
+        if (!updated[senderId]) updated[senderId] = [];
+        updated[senderId] = [...updated[senderId], data];
+        return updated;
+      });
+      console.log("📥 Received on client:", data);
+    });
 
-            setMessagesByInstructor(prev => {
-                const updated = { ...prev };
-                if (!updated[senderId]) updated[senderId] = [];
-                updated[senderId] = [...updated[senderId], data];
-                return updated;
-            });
-            console.log('📥 Received on client:', data);
-        });
-
-        return () => {
-            socket.off('receiveMessage');
-        };
-    }, [selectedInstructor]);
-
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [selectedInstructor]);
 
     return (
         <>
@@ -424,64 +426,128 @@ const Message = () => {
                                     : <div className="hidden"> </div>
 
                                 } */}
-                                    </div>
+                  </div>
+                </div>
 
-                                </div>
+                {message.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex space-x-3 ${
+                      msg.sender?.senderRole === "user" ? "justify-end" : ""
+                    }`}
+                  >
+                    <div
+                      className={`p-[12px] rounded-b-[8px] text-left ${
+                        msg.sender?.senderRole === "user"
+                          ? "bg-black text-white rounded-tl-[8px] justify-end items-end"
+                          : "bg-white bg-opacity-25 backdrop-blur-[60px] rounded-tr-[8px] justify-start items-start"
+                      }`}
+                      style={{
+                        maxWidth: "80%",
+                        width: "fit-content",
+                        wordWrap: "anywhere",
+                      }}
+                    >
+                      <p className="text-xs">
+                        {new Date(msg.createdAt).toLocaleTimeString()}
+                      </p>
 
+                      {/* 1️⃣ Hiển thị File nếu có */}
+                      {msg.file && msg.file.fileUrl && (
+                        <a
+                          href={msg.file.fileUrl}
+                          download
+                          className="text-white hover:underline"
+                        >
+                          <div className="flex justify-between px-[10px]">
+                            <div className="flex items-center gap-[5px]">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="20"
+                                viewBox="0 0 18 20"
+                                fill="white"
+                              >
+                                <mask
+                                  id="mask0_5477_2956"
+                                  style={{ maskType: "luminance" }}
+                                  maskUnits="userSpaceOnUse"
+                                  x="0"
+                                  y="0"
+                                  width="18"
+                                  height="20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M0 0.0117188H17.0527V19.8652H0V0.0117188Z"
+                                    fill="white"
+                                  />
+                                </mask>
+                                <g mask="url(#mask0_5477_2956)">
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M4.5731 1.51172C2.9161 1.51172 1.5401 2.85372 1.5011 4.50872V15.2037C1.4641 16.9167 2.8141 18.3277 4.5101 18.3657H12.5741C14.2431 18.2967 15.5651 16.9097 15.5531 15.2097V6.33972L10.9181 1.51172H4.5851H4.5731ZM4.5851 19.8657H4.4761C1.9541 19.8087 -0.0538966 17.7107 0.00110343 15.1877V4.49072C0.0591034 2.00972 2.1081 0.0117188 4.5711 0.0117188H4.5881H11.2381C11.4421 0.0117188 11.6371 0.0947188 11.7791 0.241719L16.8441 5.51872C16.9781 5.65772 17.0531 5.84472 17.0531 6.03772V15.2037C17.0711 17.7127 15.1171 19.7627 12.6041 19.8647L4.5851 19.8657Z"
+                                  />
+                                </g>
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M16.2986 6.98424H13.5436C11.7136 6.97924 10.2256 5.48724 10.2256 3.65924V0.750244C10.2256 0.336244 10.5616 0.000244141 10.9756 0.000244141C11.3896 0.000244141 11.7256 0.336244 11.7256 0.750244V3.65924C11.7256 4.66324 12.5426 5.48124 13.5456 5.48424H16.2986C16.7126 5.48424 17.0486 5.82024 17.0486 6.23424C17.0486 6.64824 16.7126 6.98424 16.2986 6.98424Z"
+                                />
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M10.7887 14.1084H5.38867C4.97467 14.1084 4.63867 13.7724 4.63867 13.3584C4.63867 12.9444 4.97467 12.6084 5.38867 12.6084H10.7887C11.2027 12.6084 11.5387 12.9444 11.5387 13.3584C11.5387 13.7724 11.2027 14.1084 10.7887 14.1084Z"
+                                />
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M8.7437 10.3564H5.3877C4.9737 10.3564 4.6377 10.0204 4.6377 9.60645C4.6377 9.19245 4.9737 8.85645 5.3877 8.85645H8.7437C9.1577 8.85645 9.4937 9.19245 9.4937 9.60645C9.4937 10.0204 9.1577 10.3564 8.7437 10.3564Z"
+                                />
+                              </svg>
 
-                                {message.map((msg, index) => (
-                                    <div
-                                        key={index}
-                                        className={`flex space-x-3 ${msg.sender?.senderRole === "user" ? "justify-end" : ""}`}
-                                    >
-                                        <div
-                                            className={`p-[12px] rounded-b-[8px] text-left ${msg.sender?.senderRole === "user"
-                                                ? "bg-black text-white rounded-tl-[8px] justify-end items-end"
-                                                : "bg-white bg-opacity-25 backdrop-blur-[60px] rounded-tr-[8px] justify-start items-start"}`}
-                                            style={{ maxWidth: "80%", width: "fit-content", wordWrap: "anywhere" }}
-                                        >
-                                            <p className="text-xs">{new Date(msg.createdAt).toLocaleTimeString()}</p>
+                              {msg.file.fileName}
+                            </div>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="white"
+                            >
+                              <path
+                                d="M12 16L11.4697 16.5303L12 17.0607L12.5303 16.5303L12 16ZM12.75 4C12.75 3.58579 12.4142 3.25 12 3.25C11.5858 3.25 11.25 3.58579 11.25 4L12.75 4ZM5.46967 10.5303L11.4697 16.5303L12.5303 15.4697L6.53033 9.46967L5.46967 10.5303ZM12.5303 16.5303L18.5303 10.5303L17.4697 9.46967L11.4697 15.4697L12.5303 16.5303ZM12.75 16L12.75 4L11.25 4L11.25 16L12.75 16Z"
+                                fill="white"
+                              />
+                              <path
+                                d="M5 21H19"
+                                stroke="white"
+                                stroke-width="1.5"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                      )}
 
-                                            {/* 1️⃣ Hiển thị File nếu có */}
-                                            {msg.file && msg.file.fileUrl && (
-                                                <a href={msg.file.fileUrl} download className="text-white hover:underline">
-                                                    <div className="flex justify-between px-[10px]">
-                                                        <div className="flex items-center gap-[5px]">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="white">
-                                                                <mask id="mask0_5477_2956" style={{ maskType: "luminance" }} maskUnits="userSpaceOnUse" x="0" y="0" width="18" height="20">
-                                                                    <path fillRule="evenodd" clipRule="evenodd" d="M0 0.0117188H17.0527V19.8652H0V0.0117188Z" fill="white" />
-                                                                </mask>
-                                                                <g mask="url(#mask0_5477_2956)">
-                                                                    <path fillRule="evenodd" clipRule="evenodd" d="M4.5731 1.51172C2.9161 1.51172 1.5401 2.85372 1.5011 4.50872V15.2037C1.4641 16.9167 2.8141 18.3277 4.5101 18.3657H12.5741C14.2431 18.2967 15.5651 16.9097 15.5531 15.2097V6.33972L10.9181 1.51172H4.5851H4.5731ZM4.5851 19.8657H4.4761C1.9541 19.8087 -0.0538966 17.7107 0.00110343 15.1877V4.49072C0.0591034 2.00972 2.1081 0.0117188 4.5711 0.0117188H4.5881H11.2381C11.4421 0.0117188 11.6371 0.0947188 11.7791 0.241719L16.8441 5.51872C16.9781 5.65772 17.0531 5.84472 17.0531 6.03772V15.2037C17.0711 17.7127 15.1171 19.7627 12.6041 19.8647L4.5851 19.8657Z" />
-                                                                </g>
-                                                                <path fillRule="evenodd" clipRule="evenodd" d="M16.2986 6.98424H13.5436C11.7136 6.97924 10.2256 5.48724 10.2256 3.65924V0.750244C10.2256 0.336244 10.5616 0.000244141 10.9756 0.000244141C11.3896 0.000244141 11.7256 0.336244 11.7256 0.750244V3.65924C11.7256 4.66324 12.5426 5.48124 13.5456 5.48424H16.2986C16.7126 5.48424 17.0486 5.82024 17.0486 6.23424C17.0486 6.64824 16.7126 6.98424 16.2986 6.98424Z" />
-                                                                <path fillRule="evenodd" clipRule="evenodd" d="M10.7887 14.1084H5.38867C4.97467 14.1084 4.63867 13.7724 4.63867 13.3584C4.63867 12.9444 4.97467 12.6084 5.38867 12.6084H10.7887C11.2027 12.6084 11.5387 12.9444 11.5387 13.3584C11.5387 13.7724 11.2027 14.1084 10.7887 14.1084Z" />
-                                                                <path fillRule="evenodd" clipRule="evenodd" d="M8.7437 10.3564H5.3877C4.9737 10.3564 4.6377 10.0204 4.6377 9.60645C4.6377 9.19245 4.9737 8.85645 5.3877 8.85645H8.7437C9.1577 8.85645 9.4937 9.19245 9.4937 9.60645C9.4937 10.0204 9.1577 10.3564 8.7437 10.3564Z" />
-                                                            </svg>
-
-                                                            {msg.file.fileName}
-                                                        </div>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                                            <path d="M12 16L11.4697 16.5303L12 17.0607L12.5303 16.5303L12 16ZM12.75 4C12.75 3.58579 12.4142 3.25 12 3.25C11.5858 3.25 11.25 3.58579 11.25 4L12.75 4ZM5.46967 10.5303L11.4697 16.5303L12.5303 15.4697L6.53033 9.46967L5.46967 10.5303ZM12.5303 16.5303L18.5303 10.5303L17.4697 9.46967L11.4697 15.4697L12.5303 16.5303ZM12.75 16L12.75 4L11.25 4L11.25 16L12.75 16Z" fill="white" />
-                                                            <path d="M5 21H19" stroke="white" stroke-width="1.5" />
-                                                        </svg>
-                                                    </div>
-                                                </a>
-                                            )}
-
-                                            {/* 2️⃣ Hiển thị Ảnh nếu có */}
-                                            {msg.image && (
-                                                <div className="my-2">
-                                                    <div onClick={() => openPopup(msg.image)}>
-                                                        <img
-                                                            src={msg.image}
-                                                            alt="uploaded"
-                                                            className="rounded"
-                                                            style={{ width: '200px', height: '200px', objectFit: 'cover' }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
+                      {/* 2️⃣ Hiển thị Ảnh nếu có */}
+                      {msg.image && (
+                        <div className="my-2">
+                          <div onClick={() => openPopup(msg.image)}>
+                            <img
+                              src={msg.image}
+                              alt="uploaded"
+                              className="rounded"
+                              style={{
+                                width: "200px",
+                                height: "200px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
 
                                             {/* 3️⃣ Hiển thị Nội dung text nếu có */}
                                             {msg.content && (
@@ -600,6 +666,7 @@ const Message = () => {
                                             >
                                                 <img
                                                     loading="lazy"
+                                                    alt="sjfsljfsldk"
                                                     src="https://cdn.builder.io/api/v1/image/assets/TEMP/8bbfb14016c67d4716e0a6366eed76fac938e5a78f6cba88c3ed041abcc52d72?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
                                                     className="absolute w-[10px] h-[10px] object-contain z-50"
                                                 />
@@ -636,6 +703,7 @@ const Message = () => {
                                             >
                                                 <img
                                                     loading="lazy"
+                                                    alt="fsjflsdjdl"
                                                     src="https://cdn.builder.io/api/v1/image/assets/TEMP/8bbfb14016c67d4716e0a6366eed76fac938e5a78f6cba88c3ed041abcc52d72?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
                                                     className="absolute w-[10px] h-[10px] object-contain z-50 "
                                                 />

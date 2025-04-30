@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Cookies from "js-cookie";
 import LoginButton from "./LoginButton.jsx";
 import FacebookLoginButton from "./FacebookLoginButton.jsx";
 
 import { loginController } from "../../../controllers/auth.controller.js";
 
-function LoginForm({ onForgotPassword }) {
+function LoginForm({ setLoading, onForgotPassword }) {
   const [formData, setFormData] = useState({
     UserEmail: "",
     UserPassword: "",
@@ -19,17 +19,23 @@ function LoginForm({ onForgotPassword }) {
   //Xử lý login with Google
   const handleGoogleLoginSuccess = async (response) => {
     try {
+      setLoading(true);
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/auth/login/google`,
         { token: response.credential },
         { withCredentials: true }
       );
       if (res.data.code === 200) {
-        localStorage.setItem("user_token", res.data.user.UserToken);
+        // Cookies.set('user_token', res.data.user.UserToken, {
+        //   expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
+        //   path: '/',  // cookie có hiệu lực toàn site
+        //   sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+        // });
         navigate("/");
       } else {
         setError(res.data.message);
       }
+      setLoading(false);
     } catch (err) {
       setError("Lỗi đăng nhập với Google");
     }
@@ -43,17 +49,27 @@ function LoginForm({ onForgotPassword }) {
   //Xử lý đăng nhập Facebook
   const handleFacebookLoginSuccess = async (fbResponse) => {
     try {
+      setLoading(true);
+      console.log({
+        accessToken: fbResponse.accessToken,
+        userID: fbResponse.userID,
+      });
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/auth/login/facebook`,
         { accessToken: fbResponse.accessToken, userID: fbResponse.userID },
         { withCredentials: true }
       );
       if (res.data.code === 200) {
-        localStorage.setItem("user_token", res.data.user);
+        Cookies.set("user_token", res.data.user, {
+          expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
+          path: "/", // cookie có hiệu lực toàn site
+          sameSite: "Lax", // tăng bảo mật, tránh CSRF
+        });
         navigate("/");
       } else {
         setError(res.data.message);
       }
+      setLoading(false);
     } catch (err) {
       setError("Lỗi đăng nhập với Facebook");
     }
@@ -70,27 +86,14 @@ function LoginForm({ onForgotPassword }) {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     console.log("Form data:", formData);
     setError(null);
     setSuccess(null);
-    try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
-        formData
-      );
-      if (res.data.code === 200) {
-        localStorage.setItem("user_role", "user");
-        navigate("/");
-      } else {
-        setError(res.data.message);
-      }
-    } catch (err) {
-      setError("Lỗi kết nối máy chủ");
-    }
-
     // Gửi dữ liệu tới server
     loginController(formData, setSuccess, setError, navigate);
+    setLoading(false);
   };
 
   return (
@@ -122,8 +125,8 @@ function LoginForm({ onForgotPassword }) {
           <LoginButton
             provider="Google"
             iconSrc="Icon/GGicon.svg"
-            onSuccess={handleFacebookLoginSuccess}
-            onFailure={handleFacebookLoginFailure}
+            onSuccess={handleGoogleLoginSuccess}
+            onFailure={handleGoogleLoginFailure}
           />
           <FacebookLoginButton
             provider="Facebook"

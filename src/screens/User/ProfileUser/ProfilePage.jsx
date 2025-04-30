@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import ProfileForm from "./ProfileForm";
-import { userController, userPostController } from "../../../controllers/user.controller";
+import {
+  userController,
+  userPostController,
+} from "../../../controllers/user.controller";
 import axios from "axios";
 import ThankYouPage from "../Payment/ThankYouPage";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 function ProfilePage() {
   let [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [imageSrc, setImageSrc] = useState(null);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [isThankVisible, setIsThankVisible] = useState(false);
 
@@ -25,7 +28,6 @@ function ProfilePage() {
     const file = e.target.files[0];
     if (file) {
       const imageURL = URL.createObjectURL(file);
-      setImageSrc(imageURL);
       setSelectedFileName(file); // Lưu tên tệp đã chọn
 
       if (uploadImagePreviewRef.current) {
@@ -59,7 +61,7 @@ function ProfilePage() {
 
       // Nếu người dùng đã chọn ảnh mới, tải lên Cloudinary
       if (selectedFileName) {
-        console.log(selectedFileName)
+        console.log(selectedFileName);
         const formData = new FormData();
         formData.append("file", selectedFileName);
         formData.append("upload_preset", "discenda"); // Preset từ Cloudinary
@@ -77,11 +79,11 @@ function ProfilePage() {
         ...formData,
         UserAvatar: uploadedImageUrl, // Thêm URL ảnh vào dữ liệu gửi đi
       };
-      console.log("form", updatedData)
+      console.log("form", updatedData);
 
       const response = await userPostController(updatedData); // Gửi dữ liệu cập nhật
       if (response.code === 200) {
-        setIsThankVisible(true)
+        setIsThankVisible(true);
         setData((prevData) => ({
           ...prevData,
           ...response.updatedData,
@@ -96,15 +98,12 @@ function ProfilePage() {
     }
   };
 
-  if (loading) {
-    return <div>Đang tải...</div>;
-  }
-
   return (
     <>
       <Helmet>
         <title>Thông tin cá nhân</title>
       </Helmet>
+      {loading && <LoadingPopup />}
       <div
         className="flex flex-col w-full min-h-screen"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.03)" }}
@@ -123,14 +122,18 @@ function ProfilePage() {
                   >
                     {/* Left Section */}
                     <div className="flex flex-col w-1/5 md:ml-12 max-md:w-full">
-                    <div className="flex flex-col items-center gap-[24px] relative max-w-[230px] max-h-[300px] aspect-auto text-[16px] lg:text-xl leading-none text-black max-md:mt-10">
-                    <img
+                      <div className="flex flex-col items-center gap-[24px] relative max-w-[230px] max-h-[300px] aspect-auto text-[16px] lg:text-xl leading-none text-black max-md:mt-10">
+                        <img
                           ref={uploadImagePreviewRef}
                           loading="lazy"
-                          src={data?.UserAvatar ? data.UserAvatar : "https://cdn.builder.io/api/v1/image/assets/9c7992bcbe164b8dad4f2629b8fc1688/2b926db059289d5c08128dea3316455c4081d26d19035d156f09a2e2fbe1385b?apiKey=9c7992bcbe164b8dad4f2629b8fc1688&"}
+                          src={
+                            data?.UserAvatar
+                              ? data.UserAvatar
+                              : "https://cdn.builder.io/api/v1/image/assets/9c7992bcbe164b8dad4f2629b8fc1688/2b926db059289d5c08128dea3316455c4081d26d19035d156f09a2e2fbe1385b?apiKey=9c7992bcbe164b8dad4f2629b8fc1688&"
+                          }
                           alt="Profile avatar"
                           className="w-[160px] lg:w-full rounded-full aspect-[1] object-cover"
-                          />
+                        />
                         <div className="btn flex gap-[12px] items-center self-center w-[175px] px-[12px]  bg-white/10 text-white  min-h-[43px] hover:bg-black">
                           <img
                             loading="lazy"
@@ -138,8 +141,12 @@ function ProfilePage() {
                             alt=""
                             className="object-contain shrink-0 self-stretch my-auto my-aspect-square w-[24px]"
                           />
-                          <label htmlFor="UserAvatar" className="text-[16px] lg:text-[1.25rem]">
-                            Tải ảnh lên {/* Hiển thị tên tệp đã chọn hoặc thông báo */}
+                          <label
+                            htmlFor="UserAvatar"
+                            className="text-[16px] lg:text-[1.25rem]"
+                          >
+                            Tải ảnh lên{" "}
+                            {/* Hiển thị tên tệp đã chọn hoặc thông báo */}
                           </label>
                           <input
                             type="file"
@@ -170,7 +177,10 @@ function ProfilePage() {
       </div>
       {isThankVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
-          <ThankYouPage onClose={handleCloseThank} content="Cập nhật thông tin cá nhân thành công!" />
+          <ThankYouPage
+            onClose={handleCloseThank}
+            content="Cập nhật thông tin cá nhân thành công!"
+          />
         </div>
       )}
     </>

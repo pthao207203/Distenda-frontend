@@ -29,7 +29,7 @@ const Main = () => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.offsetHeight);
     }
-  }, [headerRef.current]);
+  }, []);
   return (
     <div className="bg-[url('../Image/BG.png')] bg-cover bg-center bg-fixed flex flex-col justify-center pb-0 bg-[#131313] ">
       <Header
@@ -48,7 +48,7 @@ const Main = () => {
         {/* Hiển thị TaskBar dưới dạng overlay nếu trạng thái isTaskBarVisible là true */}
         {isTaskBarVisible && (
           <div
-            className="fixed inset-0 z-50 flex items-start justify-start lg:right-[18px] max-lg:right-[0px]"
+            className="fixed inset-0 z-50 flex items-start justify-end lg:right-[18px] max-lg:right-[0px]"
             style={{
               marginTop: `${headerHeight}px`,
             }}

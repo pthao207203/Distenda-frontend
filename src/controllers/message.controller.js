@@ -2,7 +2,7 @@ import {
   fetchInstructors,
   getMessages,
   createMessage,
-  markMessageAsRead,
+  // markMessageAsRead,
   markAllMessagesFromInstructorAsRead,
 } from '../services/message.service';
 

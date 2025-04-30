@@ -1,19 +1,19 @@
-import React from 'react';
+import React from "react";
 
 // Component để hiển thị hình ảnh với bóng đổ
-function ImageWithShadow({ src, alt }) {
-    return (
-        <img
-            loading="lazy"
-            src={src}
-            alt={alt}
-            className="object-contain shrink-0 bg-none w-[3.75rem]"
-        />
-    );
-}
+// function ImageWithShadow({ src, alt }) {
+//     return (
+//         <img
+//             loading="lazy"
+//             src={src}
+//             alt={alt}
+//             className="object-contain shrink-0 bg-none w-[3.75rem]"
+//         />
+//     );
+// }
 
 function PopupImage({ onClose, content }) {
-    const [isOpen, setIsOpen] = React.useState(true); // Trạng thái popup
+  const [isOpen, setIsOpen] = React.useState(true); // Trạng thái popup
 
     // Hàm đóng popup
     const handleClose = (e) => {
@@ -49,7 +49,7 @@ function PopupImage({ onClose, content }) {
                     <img
                         loading="lazy"
                         src={content || ""}
-                        alt="Image"
+                        alt="abc"
                         className="self-center items-center object-cover"
                         style={{
                             objectFit: 'contain', // Dùng 'contain' để giữ tỷ lệ

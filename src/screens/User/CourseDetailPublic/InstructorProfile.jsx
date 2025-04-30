@@ -37,7 +37,7 @@ export default function InstructorProfile(intructor) {
           ].map((item, index) => (
             <div
               key={index}
-              className="flex flex-wrap shrink items-start mt-2 w-full max-lg:mt-4"
+              className="flex flex-wrap shrink items-start mt-2 gap-1 w-full max-lg:mt-4"
             >
               <span className="font-semibold">{item.label}</span>
               {item.value}

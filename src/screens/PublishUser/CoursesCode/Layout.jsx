@@ -7,9 +7,10 @@ import {
   exerciseCheckController,
   exerciseSubmitController,
 } from "../../../controllers/exercise.controller";
-import Loading from "../../../components/Loading";
 import ThankYouPage from "../../User/Payment/ThankYouPage";
 import { exerciseController } from "../../../controllers/video.controller";
+import { Helmet } from "react-helmet";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 function CourseLayout() {
   const [data, setData] = useState();
@@ -38,10 +39,6 @@ function CourseLayout() {
       fetchData(ExerciseSlug); // Gọi fetchData với CourseSlug
     }
   }, [ExerciseSlug]);
-
-  if (loading) {
-    return <Loading />;
-  }
   console.log("exer => ", data);
 
   const handleCodeChange = (editor, data, value) => {
@@ -66,7 +63,9 @@ function CourseLayout() {
           result?.totalTests
         }`
       );
-      setSubmit(true);
+      if (result?.passedTests === result?.totalTests) {
+        setSubmit(true);
+      }
       setPopupVisible(true);
     } else if (actionType === "submit") {
       const result = await exerciseSubmitController(ExerciseSlug);
@@ -89,25 +88,32 @@ function CourseLayout() {
   };
 
   return (
-    <div className="flex flex-col self-start">
-      <div className="flex relative flex-col lg:py-0.5 w-full max-md:max-w-full self-start">
-        <BreadcrumbNav {...data} />
-        <div className="flex overflow-hidden px-[20px] relative flex-wrap items-start mt-1 h-full">
-          <TaskContent exercise={data} />
-          <CodeEditor
-            code={code}
-            handleCodeChange={handleCodeChange}
-            handleButton={handleButton}
-            submit={submit}
-          />
-        </div>
-        {popupVisible && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
-            <ThankYouPage onClose={handleCloseThank} content={content} />
+    <>
+      <Helmet>
+        <title>{data ? data.ExerciseName : "Bài tập"}</title>
+      </Helmet>
+
+      {loading && <LoadingPopup />}
+      <div className="flex flex-col self-start">
+        <div className="flex relative flex-col lg:py-0.5 w-full max-md:max-w-full self-start">
+          <BreadcrumbNav {...data} />
+          <div className="flex overflow-hidden px-[20px] relative flex-wrap items-start mt-1 h-full">
+            <TaskContent exercise={data} />
+            <CodeEditor
+              code={code}
+              handleCodeChange={handleCodeChange}
+              handleButton={handleButton}
+              submit={submit}
+            />
           </div>
-        )}
+          {popupVisible && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 max-md:px-10 overflow-hidden">
+              <ThankYouPage onClose={handleCloseThank} content={content} />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -1,6 +1,5 @@
 //Fix API của email trang này: kiểm tra email không tồn tại, email không hợp lệ do sai cú pháp
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { loginResetController } from "../../../controllers/auth.controller.js";
 
@@ -10,7 +9,6 @@ function PasswordReset({ onNext, onSetEmail }) {
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false); //Xử lý loading button
 
   const handleChange = (e) => {

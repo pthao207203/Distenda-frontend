@@ -1,76 +1,86 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { CircularProgressbar } from "react-circular-progressbar";
 
-// const lessonData = [
-//   {
-//     title: "Bài 01: Giới thiệu khóa học, Học HTML cơ bản",
-//     topics: [
-//       "Web technoligies",
-//       "Web design",
-//       "Web Development",
-//       "Web Design vs Web Development"
-//     ]
-//   },
-//   {
-//     title: "Bài 01: Giới thiệu khóa học, Học HTML cơ bản",
-//     topics: [
-//       "Web technoligies",
-//       "Web design",
-//       "Web Development",
-//       "Web Design vs Web Development"
-//     ]
-//   }
-// ];
+function LessonCard({
+  lessonId,
+  lessonName,
+  videos,
+  exerciseSlug,
 
-function LessonCard({ videoKey, courseSlug, videoStatusList,markVideoAsCompleted, ...lesson  }) {
+  videoKey,
+  courseSlug,
+  videoStatusList,
+  completionRate,
+  markVideoAsCompleted,
+}) {
+  const percentage = Math.round((completionRate ?? 0) * 100);
   return (
-    <div className="flex overflow-hidden flex-col w-full text-xl max-lg:text-[16px] leading-none">
+    <div className="flex overflow-hidden flex-col w-full text-xl max-lg:text-[14px]">
       <div className="flex gap-3 items-center px-3 py-4 w-full font-medium leading-5 text-white bg-neutral-900 min-h-[60px]">
         <div className="flex-1 shrink gap-2.5 self-stretch my-auto w-full max-w-[28rem]">
-          {lesson ? lesson.LessonName : ""}
+        {lessonName}
+        </div>
+        <div className="lg:w-[3.25rem] lg:h-[3.25rem] flex justify-center ">
+          <CircularProgressbar
+            value={percentage}
+            text={`${percentage}%`}
+            styles={{
+              path: {
+                stroke: "#CFF500", // Màu của đường tiến trình
+                strokeLinecap: "round",
+                strokeWidth: 8, // Độ dày đường viền
+              },
+              trail: {
+                stroke: "#EBF1F9", // Màu đường nền
+              },
+              text: {
+                fill: "#EBF1F9", // Màu chữ
+                fontSize: "2.5rem", // Kích thước chữ
+                fontWeight: "semibold",
+                textAlign: "center",
+                dominantBaseline: "middle",
+                textAnchor: "middle",
+              },
+            }}
+          />
         </div>
       </div>
       <div className="flex flex-col justify-center w-full text-black bg-white">
         <div className="flex flex-col  w-full">
-          {lesson &&
-            lesson.video &&
-            lesson.video.length > 0 &&
-            lesson.video.map((topic, index) => (
+        {videos.map(video => (
               <Link
-                to={`/courses/CoursePurchased/${courseSlug}/${topic.VideoSlug}`}
-                key={index}
+                to={`/courses/CoursePurchased/${courseSlug}/${video.VideoSlug}`}
+                key={video._id}
                 className={`flex gap-3 items-center justify-between px-4 py-3 w-full hover:text-[#CDD5DF] ${
-                  topic._id === videoKey ? "bg-[#EBF1F9]" : "bg-white"
+                  video._id === videoKey ? "bg-[#EBF1F9]" : "bg-white"
                 }`}
-                onClick={() => markVideoAsCompleted(topic._id)}
+                onClick={() => markVideoAsCompleted(video._id)}
               >
-                <div className="gap-2.5 self-stretch my-auto">
-                  {topic.VideoName}
+                <div className="gap-2.5 self-stretch my-auto leading-snug">
+                {video.VideoName}
                 </div>
-                {videoStatusList[topic._id] === 1  ? (
-                  <img
-                    loading="lazy"
-                    src="/Icon/done.svg"
-                    alt="Completed"
-                    className="object-cover self-center my-auto aspect-square w-[1.875rem] h-[1.875rem]"
-                  />
-                ) : (
-                  <img
-                    loading="lazy"
-                    src="/Icon/undone.svg"
-                    alt="Not Completed"
-                    className="object-cover self-center my-auto aspect-square w-[1.875rem] h-[1.875rem]"
-                  />
-                )}
+                <img
+              src={
+                videoStatusList[video._id] === 1
+                  ? "/Icon/done.svg"
+                  : "/Icon/undone.svg"
+              }
+              alt={
+                videoStatusList[video._id] === 1
+                  ? "Completed"
+                  : "Not Completed"
+              }
+              className="w-[1.875rem] h-[1.875rem]"
+              loading="lazy"
+            />
               </Link>
             ))}
         </div>
       </div>
-      {lesson.exercise && (
+      {exerciseSlug && (
         <Link
-          to={`/courses/CoursePurchased/:CourseSlug/CourseCode/${lesson.exercise.ExerciseSlug}`}
+          to={`/courses/CoursePurchased/:CourseSlug/CourseCode/${exerciseSlug}`}
           className="flex items-start py-2.5 w-full text-lg max-lg:text-[14px] font-semibold bg-slate-300 text-neutral-900"
         >
           <div className="flex flex-1 shrink gap-3 items-center p-2 basis-0">
@@ -85,20 +95,34 @@ function LessonCard({ videoKey, courseSlug, videoStatusList,markVideoAsCompleted
   );
 }
 
-function LessonList({course, videoKey, videoStatusList, markVideoAsCompleted}) {
-  const lessons = Object.values(course.lesson);
+function LessonList({
+  course,
+  videoKey,
+  videoStatusList,
+  lessonRateMap,
+  markVideoAsCompleted,
+}) {
+  const lessons = Object.values(course.lesson || {});
   return (
-    <div className="flex flex-col min-w-[200px]">
+    <div className="flex flex-col min-w-[12.5rem]">
       {lessons &&
         lessons.length > 0 &&
         lessons.map((lesson, index) => (
           <LessonCard
+          key={lesson._id}
+
+          // Props của lesson
+          lessonId={lesson._id}
+          lessonName={lesson.LessonName}
+          videos={lesson.video || []}
+          exerciseSlug={lesson.exercise?.ExerciseSlug}
+
+          // Props chung từ parent
           videoKey={videoKey}
-          courseSlug={course?.CourseSlug}
+          courseSlug={course.CourseSlug}
           videoStatusList={videoStatusList}
+          completionRate={lessonRateMap[lesson._id] ?? 0}
           markVideoAsCompleted={markVideoAsCompleted}
-          {...lesson}
-          key={index}
           />
         ))}
     </div>
