@@ -5,23 +5,23 @@ const testimonialData = [
   {
     avatar:
       "https://cdn.builder.io/api/v1/image/assets/TEMP/9a9cb1fde836e101b0adff8ddd17331a895a0430fb8f4bf1741db25dc7d605b4?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
-    name: "Chuyên nghiệp",
+    name: "Văn Huy",
     content:
-      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.",
+      "Khóa học rất bài bản, giúp mình từ người không biết gì về lập trình có thể tự làm dự án web đơn giản chỉ sau vài tuần.",
   },
   {
     avatar:
       "https://cdn.builder.io/api/v1/image/assets/TEMP/9a9cb1fde836e101b0adff8ddd17331a895a0430fb8f4bf1741db25dc7d605b4?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
-    name: "Chuyên nghiệp",
+    name: "Minh Đức",
     content:
-      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.",
+      "Môi trường học rất chuyên nghiệp, giảng viên hỗ trợ tận tình và có nhiều bài tập thực tế để luyện kỹ năng.",
   },
   {
     avatar:
       "https://cdn.builder.io/api/v1/image/assets/TEMP/9a9cb1fde836e101b0adff8ddd17331a895a0430fb8f4bf1741db25dc7d605b4?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
-    name: "Chuyên nghiệp",
+    name: "Huỳnh Vũ",
     content:
-      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.",
+      "Điểm mình thích nhất là kiến thức được cập nhật sát với nhu cầu tuyển dụng. Sau khóa học, mình tự tin ứng tuyển vào vị trí fresher backend.",
   },
 ];
 

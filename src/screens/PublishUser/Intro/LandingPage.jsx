@@ -7,7 +7,6 @@ import TeacherSection from "./TeacherSection";
 //import Footer from './Footer';
 import { Container, Row, Col } from "react-bootstrap";
 import { homeController } from "../../../controllers/home.controller";
-import Loading from "../../../components/Loading";
 import LoadingPopup from "../../../components/LoadingPopup";
 import { Helmet } from "react-helmet";
 
@@ -29,9 +28,6 @@ function LandingPage() {
     fetchData();
   }, []);
 
-  if (loading) {
-    return <Loading />;
-  }
   console.log("intructor ", data.intructor);
   console.log("courses ", data.courses);
   return (

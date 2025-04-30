@@ -79,7 +79,7 @@ const SideBar = ({ headerHeight }) => {
           try {
             // Gọi API để lấy thông báo của user thông qua userToken
             const notifications = await getNotificationsByUser(userToken);
-            console.log("notifications", notifications);
+            // console.log("notifications", notifications);
 
             // Kiểm tra xem thông báo này đã được gửi chưa
             const hasAlreadySent = notifications.some(
@@ -195,7 +195,7 @@ const SideBar = ({ headerHeight }) => {
             height="20"
             viewBox="0 0 38 20"
             fill="none"
-            className="w-[2rem] max-md:w-[16px] "
+            className="w-[20px] max-md:w-[16px] "
           >
             <path
               d="M1 1H37"

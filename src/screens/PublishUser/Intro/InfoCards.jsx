@@ -15,24 +15,23 @@ const infoCardsData = [
     icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/a090416236446ab673bd690fa7d01f0d960d8637a8d3283a03fb9ea3405a0bd7?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
     title: "Chuyên nghiệp",
     content: truncateText(
-      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.",
-      20 // Giới hạn 40 từ
+      "Chúng tôi xây dựng chương trình học bài bản, cập nhật công nghệ mới và kỹ năng thực tế giúp bạn sẵn sàng làm việc tại các công ty công nghệ hàng đầu."
+      // 20
     ),
   },
   {
     icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/7dd99b103d1c6d1f37843a55b62a12eb53e88338eccfa590194d5a19e5b5c189?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
     title: "Uy tín",
     content: truncateText(
-      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.",
-      20
+      "Được tin tưởng bởi hàng nghìn học viên và đối tác trong ngành IT, cam kết đào tạo chất lượng, hỗ trợ định hướng nghề nghiệp rõ ràng và minh bạch."
+      // 20
     ),
   },
   {
     icon: "https://cdn.builder.io/api/v1/image/assets/TEMP/34a9365c19398781429034df8caf6fc4fe68f1b9c3bc52a87dc16eb18cffc841?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
     title: "Sáng tạo",
     content: truncateText(
-      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance.",
-      20
+      "Chúng tôi khuyến khích tư duy sáng tạo trong học tập và lập trình, giúp học viên chủ động giải quyết vấn đề và xây dựng sản phẩm thực tế."
     ),
   },
 ];
