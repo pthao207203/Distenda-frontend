@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { logoutController } from "../../controllers/auth.controller";
 import Cookies from "js-cookie";
 
-function TaskBarItem({ text, onClick }) {
+function TaskBarItem({ text, onClick, handleTaskBarToggle }) {
   return (
     <button
       className="flex items-center text-left first-letter:justify-start px-[12px] py-[12px] w-full"
-      onClick={onClick} // Gọi hàm onClick khi nhấn vào button
+      onClick={() => {
+        if (handleTaskBarToggle) handleTaskBarToggle();
+        if (onClick) onClick();
+      }}
       tabIndex="0"
     >
       {text}
@@ -15,7 +18,7 @@ function TaskBarItem({ text, onClick }) {
   );
 }
 
-function TaskBar() {
+function TaskBar({ handleTaskBarToggle }) {
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
     logoutController(navigate);
@@ -46,7 +49,12 @@ function TaskBar() {
             (e) => (e.currentTarget.style.background = "rgba(0, 0, 0, 0)") // Reset khi rời chuột
           }
         >
-          <TaskBarItem key={index} text={item.text} onClick={item.onClick} />
+          <TaskBarItem
+            key={index}
+            text={item.text}
+            onClick={item.onClick}
+            handleTaskBarToggle={handleTaskBarToggle}
+          />
         </div>
       ))}
     </div>
