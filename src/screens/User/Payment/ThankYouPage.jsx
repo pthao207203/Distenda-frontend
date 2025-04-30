@@ -41,7 +41,6 @@ function ThankYouPage({ onClose, content }) {
     },
   ];
 
-  // Nếu popup đã đóng, không render gì
   if (!isOpen) return null;
 
   return (
