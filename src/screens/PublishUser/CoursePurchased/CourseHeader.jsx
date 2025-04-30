@@ -1,9 +1,7 @@
 import * as React from "react";
 
-export default function CoursesInfo(course, user) {
-  const { onOpenCertificate } = course; 
+export default function CoursesInfo({  progressStatus, onOpenCertificate, ...course}) {
   console.log("Course:", course);
-
   let lessons = [];
 
   // Kiểm tra xem course.lesson có tồn tại và là một đối tượng hay mảng
@@ -14,6 +12,8 @@ export default function CoursesInfo(course, user) {
     // Nếu là đối tượng, chuyển nó thành mảng các giá trị
     lessons = Object.values(course.lesson);
   }
+
+    const progressText = progressStatus === 1 ? "Hoàn thành" : "Chưa hoàn thành";
 
   const courseDetails = {
     type: `${course.CoursePrice === 0 ? "Miễn phí" : "Pro"}`,
@@ -27,7 +27,7 @@ export default function CoursesInfo(course, user) {
         ? "Không giới hạn"
         : course.CourseDuration + " tháng"
     }`,
-    progress: `100%`,
+     progress: progressText,
   };
 
   return (

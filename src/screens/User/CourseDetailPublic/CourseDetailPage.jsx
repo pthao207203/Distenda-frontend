@@ -73,6 +73,7 @@ export default function CourseDetailPage() {
           message,
           type: "success",
           userToken: token,
+          link: `/courses/CoursePurchased/${data.CourseSlug}`,
         });
 
         if (result.success) {

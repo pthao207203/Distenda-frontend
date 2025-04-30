@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { headerController } from "../../controllers/home.controller";
-import Loading from "../../components/Loading";
 
 export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
   const [activeLink, setActiveLink] = useState("");
   const location = useLocation(); // Theo dõi URL hiện tại
   const [openDetails, setOpenDetails] = useState(false);
+  const navRef = useRef(null);
 
   const toggleTaskBar = () => {
     setOpenDetails(!openDetails); // Đảo trạng thái openDetails
@@ -21,11 +21,9 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
     category: [],
     setting: [],
   });
-  const [loading, setLoading] = useState(false);
   useEffect(() => {
     async function fetchData() {
-      const result = await headerController(setLoading);
-      // console.log("result", result)
+      const result = await headerController();
       setData(result);
     }
 
@@ -50,18 +48,28 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
     }
   }, [location.pathname]);
 
-  if (loading) {
-    return <Loading />;
-  }
-  // console.log("category ", data.category)
-  // console.log("setting ", data.setting)
-
+     // mỗi khi activeLink thay đổi, tìm thẻ đang active và scroll/focus nó
+     useEffect(() => {
+      if (!navRef.current) return;
+      // chọn thẻ đang có background highlight
+      const activeEl = navRef.current.querySelector(".active-link");
+      if (activeEl) {
+        // focus để hiện outline (tuỳ bạn add focus:ring nếu muốn)
+        activeEl.focus();
+        // scroll nó vào giữa container
+        activeEl.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest",
+        });
+      }
+    }, [activeLink, data.category.length]);
   return (
     <header
       ref={headerRef}
       className="bg-[url('/Image/BG.png')] bg-cover bg-center bg-fixed fixed top-0 left-0 w-full z-50 backdrop-blur-[40px] max-lg:pl-[20px]"
     >
-      <div className="flex items-start justify-center px-[20px] py-3 text-white lg:gap-5">
+      <div className="flex items-start justify-center max-lg:px-[1.25rem] px-[20px] py-3 text-white lg:gap-5">
         {/* Logo */}
         <div
           style={{ flexBasis: "auto", textAlign: "center" }}
@@ -79,13 +87,15 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
 
         {/* Navigation */}
         <nav
-          className="flex items-center mt-[3px] text-[1.25rem] max-lg:text-[14px] font-semibold text-center overflow-x-auto scrollbar-hide"
+          ref={navRef}
+          className="flex items-center mt-[3px] text-[1.25rem] max-lg:text-[14px] font-semibold text-center justify-start overflow-x-auto scrollbar-hide"
           style={{ flexBasis: "85%", whiteSpace: "nowrap" }}
         >
           <Link
             to="/courses"
-            className={`flex-1 px-3 py-3 ${
-              activeLink === "/courses" ? "bg-[#CFF500] text-black" : ""
+            tabIndex={0}
+            className={`flex-1 px-3 py-3 focus:outline-none ${
+              activeLink === "/courses" ? "bg-[#CFF500] text-black active-link" : ""
             }`}
             onClick={() => handleLinkClick("/courses")}
           >
@@ -95,9 +105,10 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
             <Link
               key={cate.CategorySlug}
               to={`/category/${cate.CategorySlug}`}
-              className={`flex-1 px-3 py-3 mx-[8px] ${
+              tabIndex={0}
+              className={`flex-1 px-3 py-3 mx-[8px] focus:outline-none ${
                 activeLink === `/category/${cate.CategorySlug}`
-                  ? "bg-[#CFF500] text-black"
+                  ? "bg-[#CFF500] text-black active-link"
                   : ""
               }`}
               onClick={() => handleLinkClick(`/category/${cate.CategorySlug}`)}
@@ -124,7 +135,7 @@ export default function Header({ setHeaderHeight, handleTaskBarToggle }) {
                   : "https://cdn.builder.io/api/v1/image/assets/9c7992bcbe164b8dad4f2629b8fc1688/2b926db059289d5c08128dea3316455c4081d26d19035d156f09a2e2fbe1385b?apiKey=9c7992bcbe164b8dad4f2629b8fc1688&"
               }
               alt=""
-              className="object-cover shrink-0 w-[4rem] max-lg:w-[30px] rounded-full aspect-square"
+              className="object-cover shrink-0 w-[4rem] max-lg:w-[24px] rounded-full aspect-square"
             />
             <img
               loading="lazy"

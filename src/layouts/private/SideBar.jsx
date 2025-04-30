@@ -12,7 +12,6 @@ const SideBar = ({ headerHeight }) => {
     category: [],
     setting: [],
   });
-  const [loading, setLoading] = useState(false);
   const [member, setMember] = useState("");
   const [isOpen, setIsOpen] = useState(false); // Quản lý trạng thái mở/đóng của Sidebar
   const [isDesktop, setIsDesktop] = useState(false); // Xác định xem có phải màn hình lớn hay không
@@ -21,7 +20,8 @@ const SideBar = ({ headerHeight }) => {
     { name: "Khóa học của tôi", link: "/courses/CoursePurchased" },
     { name: "Đang học", link: "/courses/CourseStudying" },
     { name: "Đã hoàn thành", link: "/courses/CourseCompleted" },
-    { name: "Tin nhắn", link: "/user/message" },
+    { name: "Chatbox AI", link: "/user/aichating" },
+    { name: "Tin nhắn", link: "/user/message"},
   ];
 
   // Kiểm tra kích thước màn hình
@@ -45,7 +45,7 @@ const SideBar = ({ headerHeight }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const result = await headerController(setLoading);
+      const result = await headerController();
       // console.log("result", result)
       setData(result);
     }
@@ -80,7 +80,7 @@ const SideBar = ({ headerHeight }) => {
           try {
             // Gọi API để lấy thông báo của user thông qua userToken
             const notifications = await getNotificationsByUser(userToken);
-            console.log("notifications", notifications);
+            // console.log("notifications", notifications);
 
             // Kiểm tra xem thông báo này đã được gửi chưa
             const hasAlreadySent = notifications.some(
@@ -111,11 +111,6 @@ const SideBar = ({ headerHeight }) => {
     checkAndSendRankNotification();
   }, [data?.setting?.user?.UserMoney, member, userToken]); // Thêm userToken vào dependency array
 
-  if (loading) {
-    return <div>Đang tải...</div>;
-  }
-  // console.log("category ", data.category)
-  // console.log("setting ", data.setting)
   return (
     <>
       {/* Lớp phủ toàn màn hình khi Sidebar mở */}
@@ -193,7 +188,7 @@ const SideBar = ({ headerHeight }) => {
       {!isDesktop && !isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-5 left-2 z-50 p-2 bg-black text-white rounded-md max-lg:top-5 max-lg:left-5"
+          className="fixed top-[0.75rem] left-[1.125rem] z-50 p-2 bg-black text-white rounded-md max-lg:top-[1rem] max-lg:left-[0.25rem]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -201,7 +196,7 @@ const SideBar = ({ headerHeight }) => {
             height="20"
             viewBox="0 0 38 20"
             fill="none"
-            className="max-lg:w-[30px] "
+            className="w-[20px] max-md:w-[16px] "
           >
             <path
               d="M1 1H37"

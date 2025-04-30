@@ -1,4 +1,5 @@
 import { getNotificationsByUser, addNotification } from '../services/notification.service';
+import { checkCourseExpiryService } from '../services/notification.service';
 
 export async function notificationListController(setLoading, userToken) {
   try {
@@ -22,5 +23,18 @@ export async function notificationAddController(setLoading, message, type, userT
   } catch (err) {
     console.error(err);
     setLoading(false);
+  }
+}
+
+export async function notificationCheckExpiryController(setLoading, userToken) {
+  try {
+    setLoading(true);
+    const result = await checkCourseExpiryService(userToken);
+    setLoading(false);
+    return result;
+  } catch (err) {
+    console.error(err);
+    setLoading(false);
+    return null;
   }
 }

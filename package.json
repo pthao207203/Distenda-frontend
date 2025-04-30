@@ -28,6 +28,7 @@
     "react-facebook": "^9.0.12",
     "react-helmet": "^6.1.0",
     "react-redux": "^9.1.2",
+    "react-responsive": "^10.0.1",
     "react-router-dom": "^6.28.0",
     "react-scripts": "^5.0.1",
     "react-spinners": "^0.14.1",

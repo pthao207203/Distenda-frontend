@@ -33,10 +33,10 @@ function SubNavigation(video) {
           className="object-cover shrink-0 self-stretch my-auto aspect-square w-[20px]"
         />
       </div>
-      <div className="flex gap-3 items-center self-stretch px-3 py-1.5 my-auto min-w-[240px]">
+      <div className="flex gap-3 items-center self-stretch px-3 py-1.5 my-auto min-w-[15rem]">
         <Link
           to={`/courses/CoursePurchased/${video.course?.CourseSlug}`}
-          className="gap-2.5 self-stretch my-auto"
+          className="gap-2.5 self-stretch my-auto leading-snug"
         >
           {video.course?.CourseName}
         </Link>
@@ -47,8 +47,8 @@ function SubNavigation(video) {
           className="object-cover shrink-0 self-stretch my-auto aspect-square w-[20px]"
         />
       </div>
-      <div className="flex gap-3 items-center self-stretch px-3 py-1.5 my-auto min-w-[240px] min-h-[20px]">
-        <Link to="" className="gap-2.5 self-stretch my-auto min-w-[240px]">
+      <div className="flex gap-3 items-center self-stretch px-3 py-1.5 my-auto min-w-[15rem] min-h-[20px]">
+        <Link to="" className="gap-2.5 self-stretch my-auto min-w-[15rem] leading-snug">
           {video.VideoName}
         </Link>
       </div>

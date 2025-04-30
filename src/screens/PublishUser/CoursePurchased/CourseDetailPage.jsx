@@ -3,38 +3,75 @@ import CourseHeader from "./CourseHeader";
 import CourseContent from "./CourseContent";
 import CertificatePopup from "./CertificatePopup";
 import { courseDetailController } from "../../../controllers/course.controller";
-import Loading from "../../../components/Loading";
+import { getVideoStatusController } from "../../../controllers/user.controller";
 import { useParams } from "react-router-dom";
 import Rating from "./Rating";
+import { Helmet } from "react-helmet";
+import LoadingPopup from "../../../components/LoadingPopup";
 
 export default function CourseDetailPage() {
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
-  const [showCertificate, setShowCertificate] = useState(false);
-
+  const [videoStatusList, setVideoStatusList] = useState({});
+  const [lessonRateMap, setLessonRateMap] = useState({});
+  const [progressStatus, setProgressStatus] = useState(0);
   const { CourseSlug } = useParams();
-
+  const [showCertificate, setShowCertificate] = useState(false);
   useEffect(() => {
-    async function fetchData(courseSlug) {
-      const result = await courseDetailController(setLoading, courseSlug);
-      if (result) {
-        setData(result);
+    if (!CourseSlug) return;
+    (async () => {
+      setLoading(true);
+      try {
+        // Lấy chi tiết khóa học
+        const detail = await courseDetailController(setLoading, CourseSlug);
+        if (!detail) return;
+
+        // Lấy tiến trình khóa học
+        setData(detail);
+        const uc = detail.user?.UserCourse?.find(
+          (c) => c.CourseId === detail._id
+        );
+        setProgressStatus(uc?.CourseStatus ?? 0);
+
+        // Lấy trạng thái video của khóa
+        const statusData = await getVideoStatusController(detail._id);
+        const vidList = {};
+        const rateMap = {};
+        statusData.lessons.forEach(({ lessonId, completionRate, videos }) => {
+          rateMap[lessonId] = completionRate;
+          videos.forEach(({ videoId, completed }) => {
+            vidList[videoId] = completed ? 1 : 0;
+          });
+        });
+        setVideoStatusList(vidList);
+        setLessonRateMap(rateMap);
+      } catch (err) {
+        console.error("Error in CourseDetailPage:", err);
+      } finally {
+        setLoading(false);
       }
-    }
-
-    if (CourseSlug) {
-      fetchData(CourseSlug);
-    }
+    })();
   }, [CourseSlug]);
+  console.log("data", data);
+  console.log("videoStatusList", videoStatusList);
+  console.log("lessonRateMap", lessonRateMap);
+  console.log("progressStatus", progressStatus);
+  return (
+    <>
+      <Helmet>
+        <title>{data ? data.CourseName : "Chi tiết khoá học"}</title>
+      </Helmet>
 
-  if (loading) {
-    return <Loading />;
-  } else
-    return (
+      {loading && <LoadingPopup />}
+
       <div className="flex overflow-hidden flex-col">
-        <CourseHeader {...data} onOpenCertificate={() => setShowCertificate(true)} />
+        <CourseHeader {...data} progressStatus={progressStatus} onOpenCertificate={() => setShowCertificate(true)} />
         <div className="flex z-10 flex-col lg:px-[6rem] mt-0 w-full bg-white bg-opacity-10 min-h-screen max-lg:mt-0 max-lg:px-[20px] max-lg:max-w-full">
-          <CourseContent {...data} />
+          <CourseContent
+            {...data}
+            videoStatusList={videoStatusList}
+            lessonRateMap={lessonRateMap}
+          />
           <Rating
             setLoading={setLoading}
             courseID={data?._id}
@@ -53,5 +90,6 @@ export default function CourseDetailPage() {
       />
       )}
       </div>
+      </>
     );
 }
