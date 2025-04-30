@@ -17,9 +17,7 @@ export async function homeController(setLoading) {
 // [GET] /header
 export async function headerController() {
   try {
-    // console.log("resultcontroller1");
     const result = await headerService(); // Gọi service để xử lý API
-    // console.log("resultcontroller2", result);
     return result;
   } catch (err) {
     console.error(err); // Ghi log lỗi
