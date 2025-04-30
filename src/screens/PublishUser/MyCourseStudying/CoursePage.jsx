@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import CourseCard from "../MyCoursePurchased/CourseCard";
-import SearchBar from "../Course/SearchBar"; // Import SearchBar
+// import SearchBar from "../Course/SearchBar"; // Import SearchBar
 import { coursesStudyingController } from "../../../controllers/course.controller";
 import LoadingPopup from "../../../components/LoadingPopup";
 
