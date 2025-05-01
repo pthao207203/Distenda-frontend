@@ -53,14 +53,21 @@ export default function CheckoutPage({ onClose, ...course }) {
       );
 
       if (response.data.code === 200) {
-        window.location.href = response.data.payUrl;
+        // Kiểm tra có payUrl (MoMo) hay redirectUrl (khóa miễn phí)
+        if (response.data.payUrl) {
+          window.location.href = response.data.payUrl; // chuyển sang cổng MoMo
+        } else if (response.data.redirectUrl) {
+          window.location.href = response.data.redirectUrl; // chuyển về trang khóa học
+        }
       } else {
         alert(response.data.message);
       }
-    } catch (error) {
-      console.error("Lỗi thanh toán MoMo:", error);
-      alert("Thanh toán MoMo thất bại, vui lòng thử lại!");
     }
+    catch (error) {
+      console.error("Error during payment:", error);
+      alert("Đã có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.");
+    }      
+
   };
 
   return (
