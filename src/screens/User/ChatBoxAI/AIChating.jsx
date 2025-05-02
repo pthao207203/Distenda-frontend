@@ -54,11 +54,13 @@ function AIChating() {
     const lowerCaseMsg = newMessage.message.toLowerCase();
 
     // Kiểm tra câu hỏi về phương thức thanh toán
-    const isPaymentMethodQuestion =
-      (lowerCaseMsg.includes("phương thức") &&
-        lowerCaseMsg.includes("thanh toán")) ||
-      lowerCaseMsg.includes("thanh toán bằng") ||
-      lowerCaseMsg.includes("cách thanh toán");
+    const isPaymentMethodQuestion = (
+      lowerCaseMsg.includes("phương thức") && lowerCaseMsg.includes("thanh toán")
+   ) || (
+      lowerCaseMsg.includes("thanh toán bằng")
+   ) || (
+      lowerCaseMsg.includes("cách thanh toán")
+   );   
 
     if (isPaymentMethodQuestion) {
       const botMessage = {
