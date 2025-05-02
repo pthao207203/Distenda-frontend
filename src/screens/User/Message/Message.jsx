@@ -453,7 +453,7 @@ const Message = () => {
             <div className="flex flex-col h-full overflow-hidden-scroll overflow-y-auto justify-between justify-items-between bg-white min-h-[calc(100vh-150px)] overflow-hidden-scroll bg-opacity-10 backdrop-blur-[20px] overflow-auto p-[20px] space-y-[1rem] text-[12px] lg:text-[1.25rem] ">
               <div
                 ref={chatContainerRef}
-                className="flex flex-col h-full overflow-y-auto overflow-hidden-scroll space-y-4 overflow-y-auto"
+                className="flex flex-col h-full overflow-y-auto overflow-hidden-scroll space-y-4"
                 style={{ maxHeight: "calc(100vh - 250px)" }}
               >
                 <div className="flex-col justify-start items-start">

@@ -19,12 +19,17 @@ function AIChating() {
   useEffect(() => {
     const initChatbot = async () => {
       try {
-        const resUser = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/user/me`, {
-          withCredentials: true,
-        });
+        const resUser = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URLL}/user/me`,
+          {
+            withCredentials: true,
+          }
+        );
         setCurrentUser(resUser.data);
 
-        const resContext = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/site-context`);
+        const resContext = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/site-context`
+        );
         setGlobalContext(resContext.data);
       } catch (err) {
         console.error("Lỗi khởi tạo chatbot:", err);
@@ -49,11 +54,6 @@ function AIChating() {
     const lowerCaseMsg = newMessage.message.toLowerCase();
 
     // Kiểm tra câu hỏi về phương thức thanh toán
-    // const paymentMethodKeywords = [
-    //   "phương thức thanh toán",
-    //   "cách thanh toán",
-    //   "hỗ trợ thanh toán",
-    // ];
     const isPaymentMethodQuestion = (
       lowerCaseMsg.includes("phương thức") && lowerCaseMsg.includes("thanh toán")
    ) || (
@@ -65,7 +65,7 @@ function AIChating() {
     if (isPaymentMethodQuestion) {
       const botMessage = {
         isUser: false,
-        message: "💳 Bạn có thể thanh toán bằng MoMo.",
+        message: "💳 Bạn có thể thanh toán bằng MoMo và ZaloPay.",
         time: new Date().toLocaleTimeString(),
       };
       setMessages((prev) => [...prev, botMessage]);
