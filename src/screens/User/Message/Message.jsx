@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
+import axios from "axios";
 import "./Message.css";
 import uploadImage from "../../../components/UploadImage";
 import uploadFile from "../../../components/UploadFile";
@@ -14,7 +15,7 @@ import {
 } from '../../../controllers/message.controller';
 import { getMessages } from '../../../services/message.service';
 import { io } from "socket.io-client";
-const socket = io(`${process.env.REACT_APP_API_BASE_URL}`);
+
 
 const Message = () => {
     const [instructors, setInstructors] = useState([]);
@@ -33,8 +34,20 @@ const Message = () => {
     const [infoFiles, setInfoFiles] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
     const chatContainerRef = useRef(null);
+   const socketRef = useRef(null);
+    const selectedInstructorRef = useRef(null);
+    const [currentUser, setCurrentUser] = useState(null);
+    
+    useEffect(() => {
+      selectedInstructorRef.current = selectedInstructor;
+    }, [selectedInstructor]);
 
-
+    useEffect(() => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+    }, [message]);
+  
 
 
   const openInfoMessagePopup = () => {
@@ -179,7 +192,11 @@ const Message = () => {
             receiverRole: 'admin',
             content: (newMessage || '').trim(),  // Content có thể là chuỗi rỗng
             image: uploadedImageUrl || '', // Image có thể là null hoặc chuỗi rỗng
-            file: uploadedFileData || {}
+            file: uploadedFileData || {},
+            sender: {
+              userId: currentUser._id,
+              senderRole: 'user'
+            }
         };
 
     setNewMessage("");
@@ -190,10 +207,17 @@ const Message = () => {
     }
 
     await sendMessage(messageData, (sentMsg) => {
-      socket.emit("sendMessage", sentMsg);
-      setMessages((prev) =>
-        prev.map((msg) => (msg === tempMessage ? sentMsg : msg))
-      );
+      if (!sentMsg.sender?.userId) {
+        sentMsg.sender = {
+          userId: currentUser._id,
+          senderRole: 'user',
+        };
+      }
+      sentMsg.receiverId = sentMsg.receiver?.userId;
+      sentMsg.receiverRole = sentMsg.receiver?.receiverRole;
+    
+    
+      socketRef.current?.emit("sendMessage", sentMsg);
 
       setMessagesByInstructor((prev) => {
         const updated = { ...prev };
@@ -228,6 +252,7 @@ const Message = () => {
   // ✅ Khi chọn 1 giáo viên
   const handleSelectInstructor = async (teacher) => {
     setSelectedInstructor(teacher);
+    selectedInstructorRef.current = selectedInstructor;
     setMessages([]); // 👈 Xoá ngay toàn bộ tin nhắn cũ
 
     try {
@@ -256,37 +281,65 @@ const Message = () => {
     };
    
     useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      const fetchUser = async () => {
+        try {
+          const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/user/me`, {
+            withCredentials: true,
+          });
+    
+          const userId = res.data?._id;
+          setCurrentUser(res.data);
+    
+          if (!userId) return;
+    
+          const socket = io(`${process.env.REACT_APP_API_BASE_URL}`, {
+            query: {
+              userId,
+              role: 'user', // hoặc 'admin'
+            },
+            withCredentials: true
+          });
+    
+          socketRef.current = socket;
+    
+          socket.on("connect", () => {
+            console.log("✅ Socket connected:", socket.id);
+          });
+    
+          // 🟢 LẮP VÀO socket listener Ở ĐÂY (bên trong fetchUser)
+          socket.on("receiveMessage", (data) => {
+            const senderId = data.sender?.userId;
+            if (!senderId) return;
+    
+            setMessagesByInstructor((prev) => {
+              const updated = { ...prev };
+              if (!updated[senderId]) updated[senderId] = [];
+              updated[senderId] = [...updated[senderId], data];
+              return updated;
+            });
+    
+            if (
+              data.sender?.senderRole === 'admin' &&
+              selectedInstructorRef.current?.instructorId === data.sender?.userId
+            ) {
+              setMessages((prev) => [...prev, data]);
+              updateMessageStatus(data.sender.userId);
+            }
+            console.log("📩 Received message from socket:", data);
+          });
+    
+        } catch (error) {
+          console.error("❌ Không thể kết nối socket user:", error);
         }
-    }, [message]);
-
-  useEffect(() => {
-    socket.on("receiveMessage", (data) => {
-      const senderId = data.sender?.userId;
-      if (!senderId) return; // Nếu không có senderId thì bỏ qua
-
-      if (selectedInstructor && senderId === selectedInstructor.instructorId) {
-        setMessages((prev) => [...prev, data]);
-      }
-      if (data.type === "image") {
-        // Thêm vào tin nhắn với ảnh
-        setMessages((prev) => [...prev, data]);
-      }
-
-      setMessagesByInstructor((prev) => {
-        const updated = { ...prev };
-        if (!updated[senderId]) updated[senderId] = [];
-        updated[senderId] = [...updated[senderId], data];
-        return updated;
-      });
-      console.log("📥 Received on client:", data);
-    });
-
-    return () => {
-      socket.off("receiveMessage");
-    };
-  }, [selectedInstructor]);
+      };
+    
+      fetchUser();
+    
+      return () => {
+        socketRef.current?.disconnect();
+      };
+    }, []);
+    
 
     return (
         <>
@@ -317,9 +370,9 @@ const Message = () => {
                                                 alt="avatar"
                                                 className="h-[40px] max-w-[40px] min-w-[40px] mr-[10px] max-md:aspect-[1.25] rounded-full object-cover"
                                             />
-                                            <div className="flex items-center justify-between space-y-0 max-md:hidden">
+                                            <div className="flex items-center justify-between space-y-0 max-md:hidden cursor-pointer">
                                                 <div className="flex-col justify-between space-y-2 w-full">
-                                                    <div className="text-[1.25rem] font-semibold">
+                                                    <div className="text-[1.25rem] font-semibold cursor-pointer">
                                                         {teacher.instructorName
                                                             ? teacher.instructorName.split(" ").slice(-2).join(" ")
                                                             : "Giáo viên"}
@@ -538,7 +591,7 @@ const Message = () => {
                             <img
                               src={msg.image}
                               alt="uploaded"
-                              className="rounded"
+                              className="rounded cursor-pointer"
                               style={{
                                 width: "200px",
                                 height: "200px",
