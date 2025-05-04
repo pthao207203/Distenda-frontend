@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import LoginButton from "../Login/LoginButton.jsx";
 import FacebookLoginButton from "../Login/FacebookLoginButton.jsx";
 
@@ -28,10 +28,10 @@ function RegisterForm({ setLoading }) {
         { withCredentials: true }
       );
       if (res.data.code === 200) {
-        Cookies.set('user_token', res.data.user.UserToken, {
+        Cookies.set("user_token", res.data.user.UserToken, {
           expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
-          path: '/',  // cookie có hiệu lực toàn site
-          sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+          path: "/", // cookie có hiệu lực toàn site
+          sameSite: "Lax", // tăng bảo mật, tránh CSRF
         });
         navigate("/");
       } else {
@@ -53,10 +53,10 @@ function RegisterForm({ setLoading }) {
         { withCredentials: true }
       );
       if (res.data.code === 200) {
-        Cookies.set('user_token', res.data.user, {
+        Cookies.set("user_token", res.data.user, {
           expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
-          path: '/',  // cookie có hiệu lực toàn site
-          sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+          path: "/", // cookie có hiệu lực toàn site
+          sameSite: "Lax", // tăng bảo mật, tránh CSRF
         });
         navigate("/");
       } else {
@@ -227,8 +227,16 @@ function RegisterForm({ setLoading }) {
             />
           </div>
         </div>
-        {error && <p className="mt-4 text-red-500">{error}</p>}
-        {success && <p className="mt-4 text-[#CFF500]">{success}</p>}
+        {error && (
+          <p className="mt-4 text-red-500 text-[1.125rem] max-lg:text-[12px]">
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="mt-4 text-[#CFF500] text-[1.125rem] max-lg:text-[12px]">
+            {success}
+          </p>
+        )}
         <button
           type="submit"
           className="flex flex-wrap gap-5 justify-center items-center mt-[20px] w-full text-[1.25rem] max-lg:text-[14px] font-normal bg-[#CFF500] min-h-[40px] text-neutral-900 max-lg:max-w-full"
