@@ -56,7 +56,7 @@ export const logoutController = async (navigate) => {
 };
 
 // [POST] /user/password/forgot
-export const loginResetController = async (data, setSuccess, setError, navigate) => {
+export const loginResetController = async (data, setSuccess, setError) => {
   try {
     const result = await loginResetService(data); // Gọi service để xử lý API
     if (result.code === 400) {
