@@ -6,17 +6,16 @@ export const getNotificationsByUser = async (userToken) => {
       credentials: 'include',
     });
 
-    if (!response.ok) {
-      throw new Error('Lỗi khi lấy thông báo!');
-    }
+    if (!response.ok) throw new Error('Lỗi khi lấy thông báo!');
 
     const data = await response.json();
-    return data.data;
+    return data?.success && Array.isArray(data.data) ? data.data : []; // đảm bảo trả về mảng
   } catch (error) {
     console.error("Lỗi khi gọi API getNotificationsByUser:", error);
-    throw new Error(error.message);
+    return []; // fallback nếu lỗi
   }
 };
+
 
 // [POST] Tạo một thông báo mới
 export const addNotification = async ({ message, type = "success", userToken }) => {
