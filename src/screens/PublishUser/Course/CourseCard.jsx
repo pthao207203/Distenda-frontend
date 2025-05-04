@@ -56,7 +56,9 @@ function CourseCard(course) {
         <div className="flex items-start mt-[0.75rem] w-full">
           <div className="flex shrink-0 w-auto">Giảng viên</div>
           <div className="flex-1 text-right">
-            {course.intructor ? course.intructor : "Không có"}
+            {course.CourseIntructor
+              ? course.CourseIntructor.AdminFullName
+              : "Không có"}
           </div>
         </div>
       </div>

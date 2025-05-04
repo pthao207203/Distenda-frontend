@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import CourseCard from "./CourseCard";
-import SearchBar from "../Course/SearchBar"; // Import SearchBar
+// import SearchBar from "../Course/SearchBar"; // Import SearchBar
 import { coursesPurchasedController } from "../../../controllers/course.controller";
 import LoadingPopup from "../../../components/LoadingPopup";
 
@@ -34,7 +34,7 @@ function CoursePage() {
         <main>
           <div className="max-w-full flex flex-col items-center w-full px-5 pt-12 pb-20 bg-white bg-opacity-10 backdrop-blur-[10px]">
             {/* Thanh tìm kiếm */}
-            <SearchBar />
+            {/* <SearchBar /> */}
             {/* Khu vực chứa các thẻ */}
             {data && data.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-between gap-[40px] max-sm:gap-[10px] max-md:gap-[20px] mt-10 w-full">

@@ -124,7 +124,7 @@ function Banner() {
             data.length > 0 &&
             data.map((banner, index) => (
               <Link
-                to={`/courses/${banner.course.CourseSlug}`}
+                to={`/courses/${banner.BannerCourse.CourseSlug}`}
                 key={index}
                 className="w-full flex-shrink-0"
               >

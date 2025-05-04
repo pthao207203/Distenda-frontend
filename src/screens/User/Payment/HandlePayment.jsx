@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useState
-} from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ThankYouPage from "./ThankYouPage";
 
@@ -11,24 +8,26 @@ export default function HandlePayment() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const orderId = params.get('orderId');
-    const resultCode = params.get('resultCode');
-    const amount = params.get('amount');
+    const resultCode = params.get("resultCode"); // MoMo
+    const status = params.get("status");         // ZaloPay
+    const orderId =
+      params.get("orderId") || params.get("apptransid"); // dùng cho cả 2
+    const amount = params.get("amount");
 
-    if (resultCode === '0') {
-      axios.post('http://localhost:3001/payment/confirm', {
-          orderId,
-          amount
-        }, {
-          withCredentials: true
-        })
-        .then(res => {
-          setPopupContent("🎉 Thanh toán thành công! Khóa học đã được kích hoạt.");
+    // Thanh toán thành công
+    if (resultCode === "0" || status === "1") {
+      axios
+        .post(
+          "http://localhost:3001/payment/confirm",
+          { orderId, amount },
+          { withCredentials: true }
+        )
+        .then((res) => {
+          setPopupContent("Thanh toán thành công! Khóa học đã được kích hoạt.");
           setShowPopup(true);
         })
-        .catch(err => {
+        .catch((err) => {
           if (err.response) {
-            console.log("Lỗi backend:", err.response.data);
             setPopupContent(`${err.response.data.message}`);
           } else {
             setPopupContent("Lỗi kết nối server!");
@@ -36,6 +35,7 @@ export default function HandlePayment() {
           setShowPopup(true);
         });
     } else {
+      // Thanh toán thất bại
       setPopupContent("Thanh toán thất bại hoặc bị hủy!");
       setShowPopup(true);
     }

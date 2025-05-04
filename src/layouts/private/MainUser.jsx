@@ -53,7 +53,7 @@ const Main = () => {
               marginTop: `${headerHeight}px`,
             }}
           >
-            <TaskBar />
+            <TaskBar handleTaskBarToggle={handleTaskBarToggle} />
           </div>
         )}
         {/* Hiển thị Outlet */}

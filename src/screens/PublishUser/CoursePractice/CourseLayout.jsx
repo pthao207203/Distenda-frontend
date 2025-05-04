@@ -69,6 +69,7 @@ function CourseLayout() {
       console.error(err);
     }
   };
+  console.log("video ", data);
 
   return (
     <>
