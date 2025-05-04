@@ -77,6 +77,11 @@ export const loginOTPController = async (data, setSuccess, setError, navigate) =
     if (result.code === 400) {
       setError(result.message);
     } else {
+      Cookies.set('user_token', result.token, {
+        expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
+        path: '/',  // cookie có hiệu lực toàn site
+        sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+      });
       setSuccess(result.message || 'Xác nhận thành công!');
     }
     return result;
