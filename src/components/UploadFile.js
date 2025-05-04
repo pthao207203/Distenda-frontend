@@ -7,7 +7,6 @@ const uploadFile = async (selectedFile) => {
     formData.append("upload_preset", "discenda");  // Preset cloudinary của bạn
 
     const response = await axios.post(process.env.REACT_APP_CLOUDINARY_FILE_URL, formData);
-    console.log(process.env.REACT_APP_CLOUDINARY_URL);
 
     return response.data.secure_url;
   } catch (error) {
