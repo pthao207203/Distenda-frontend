@@ -9,11 +9,11 @@ export const loginController = async (data, setSuccess, setError, navigate) => {
       setError(result.message);
     } else {
       setSuccess(result.message || 'Đăng nhập thành công!');
-      // Cookies.set('user_token', result.token, {
-      //   expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
-      //   path: '/',  // cookie có hiệu lực toàn site
-      //   sameSite: 'Lax' // tăng bảo mật, tránh CSRF
-      // });
+      Cookies.set('user_token', result.token, {
+        expires: 7, // số ngày hết hạn (ở đây là 7 ngày)
+        path: '/',  // cookie có hiệu lực toàn site
+        sameSite: 'Lax' // tăng bảo mật, tránh CSRF
+      });
       setTimeout(() => {
         navigate('/courses'); // Điều hướng tới trang chủ (trang khóa học)
       }, 3000);
