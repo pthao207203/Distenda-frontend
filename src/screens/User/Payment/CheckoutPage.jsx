@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import ProductCard from "./ProductCard";
 import UserForm from "./UserForm";
-import './Scroll.css';
+import "./Scroll.css";
 
 export default function CheckoutPage({ onClose, ...course }) {
   const productDetails = {
@@ -27,7 +27,7 @@ export default function CheckoutPage({ onClose, ...course }) {
   const handleZaloPay = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/pay/${course.CourseSlug}/zalopay`,
+        `${process.env.REACT_APP_API_BASE_URL}/pay/${course.CourseSlug}/zalopay`,
         {},
         { withCredentials: true }
       );
@@ -45,7 +45,7 @@ export default function CheckoutPage({ onClose, ...course }) {
   const handlePayment = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/pay/${course.CourseSlug}/momo`,
+        `${process.env.REACT_APP_API_BASE_URL}/pay/${course.CourseSlug}/momo`,
         {},
         {
           withCredentials: true,
@@ -62,12 +62,10 @@ export default function CheckoutPage({ onClose, ...course }) {
       } else {
         alert(response.data.message);
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Error during payment:", error);
       alert("Đã có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.");
-    }      
-
+    }
   };
 
   return (
@@ -103,13 +101,13 @@ export default function CheckoutPage({ onClose, ...course }) {
           onClick={handlePayment}
           className="flex gap-3 justify-center items-center self-center px-2 py-[16px] mt-10 text-xl max-lg:text-[14px] font-medium text-white bg-neutral-900 w-[240px] max-lg:max-w-[200px]"
         >
-          <span>Đăng ký</span>
+          <span>Thanh toán Momo</span>
         </button>
         <button
           onClick={handleZaloPay}
-          className="flex gap-3 justify-center items-center self-center px-3 py-4 mt-3 text-xl max-lg:text-[14px] font-medium text-white bg-neutral-900 w-[272px]"
+          className="flex gap-3 justify-center items-center self-center px-2 py-[16px] mt-10 text-xl max-lg:text-[14px] font-medium text-white bg-neutral-900 w-[240px] max-lg:max-w-[200px]"
         >
-          Thanh toán ZaloPay
+          <span>Thanh toán ZaloPay</span>
         </button>
         {/* <div className="flex flex-col items-center mt-4 gap-4">
           <button
