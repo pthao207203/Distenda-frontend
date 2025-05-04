@@ -31,6 +31,7 @@ export default function CheckoutPage({ onClose, ...course }) {
         {},
         { withCredentials: true }
       );
+      console.log(response);
       if (response.data.code === 200) {
         window.location.href = response.data.payUrl;
       } else {
