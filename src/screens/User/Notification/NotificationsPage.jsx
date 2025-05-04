@@ -4,9 +4,9 @@ import Cookies from "js-cookie";
 import { getNotificationsByUser } from "../../../services/notification.service";
 import { io } from "socket.io-client"; // 👉 import socket
 
-const socket = io(process.env.REACT_APP_API_BASE_URL, {
-  withCredentials: true,
-}); // 👈 nhớ đúng URL server socket.io backend
+// const socket = io(process.env.REACT_APP_API_BASE_URL, {
+//   withCredentials: true,
+// });
 
 function NotificationsPage() {
   const [dynamicNotifications, setDynamicNotifications] = useState([]);
@@ -49,14 +49,14 @@ function NotificationsPage() {
     fetchNotifications();
 
     // 🧡 Khi có socket event "newNotification", tự động fetch lại
-    socket.on("new_notification", () => {
-      console.log("🔔 Có thông báo mới!");
-      fetchNotifications();
-    });
+    // socket.on("new_notification", () => {
+    //   console.log("🔔 Có thông báo mới!");
+    //   fetchNotifications();
+    // });
 
-    return () => {
-      socket.off("new_notification"); // 👈 Dọn dẹp event
-    };
+    // return () => {
+    //   socket.off("new_notification"); // 👈 Dọn dẹp event
+    // };
   }, []);
 
   const sortedNotifications = dynamicNotifications.sort((a, b) => {
