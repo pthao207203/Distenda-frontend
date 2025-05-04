@@ -50,7 +50,7 @@ function CourseLayout() {
       const result = await exerciseCheckController(
         code,
         ExerciseSlug,
-        data.course.CourseLanguage
+        data.ExerciseLanguage
       );
       console.log("result", result);
       if (result.code === 200) {
