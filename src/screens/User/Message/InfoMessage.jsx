@@ -31,26 +31,26 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
   if (!isOpen) return null;
 
     return (
-        <div className="fixed top-0 object-contain inset-0 z-50 bg-none h-screen w-screen flex justify-center  items-center"
+        <div className="fixed top-0 object-contain inset-0 z-50 bg-none h-screen w-screen flex justify-center py-[1.125rem] items-center"
             onClick={handleClose}>
 
-            <div className="flex flex-col bg-black justify-center max-w-fit min-w-[300px]  bg-opacity-50 backdrop-blur-[60px] max-h-[600px] max-w-full h-full px-[20px]">
+            <div className="flex flex-col bg-black justify-start w-[30%] max-md:w-[60%] max-sm:w-full bg-opacity-50 backdrop-blur-[60px] max-h-[90%] max-w-full h-full px-[20px]">
         
 
-            <div className="">
+            <div>
                     <button className="w-full">
                         
                         <img
                             loading="lazy"
                             src="https://cdn.builder.io/api/v1/image/assets/TEMP/8bbfb14016c67d4716e0a6366eed76fac938e5a78f6cba88c3ed041abcc52d72?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
-                            className="absolute top-[20px] right-[40px] w-[20px] h-[20px] object-contain z-50"
+                            className="absolute top-[20px] right-[2rem] w-[1.5rem] h-[1.5rem] object-contain z-50"
                             alt="Close icon"
                             onClick={handleClose} // Gọi hàm handleClose khi click vào icon
                         />
                     </button>
                 </div>
-                <div className="relative flex-col justify-between bg-none h-fit px-[20px]">
-                    <div className="flex flex-col justify-center items-center mb-[5px]">
+                <div className="relative flex-col justify-between bg-none h-fit px-[1.5rem] py-[1.5rem]">
+                    <div className="flex flex-col justify-center items-center mb-[5px] mt-[5px]">
                         <img
                             src={avatar || 'https://via.placeholder.com/150'}
                             alt="Avatar"
@@ -60,7 +60,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
 
                     </div>
 
-                    <div className="flex justify-between items-center cursor-pointer text-white max-md:text-[12px] mb-2"
+                    <div className="flex justify-between items-center cursor-pointer text-white text-[1.125rem] max-md:text-[12px] mb-2"
                         onClick={() => setShowImages(!showImages)}>
                         <span>Hình ảnh</span>
                         <span className={`transition-transform ${showImages ? '' : 'rotate-180'}`}>
@@ -71,7 +71,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                     </div>
                     <div className="flex justify-center items-center w-full">
                         {showImages && (
-                            <div className="grid lg:grid-cols-5 max-lg:grid-cols-5 max-md:grid-cols-5 md:grid-cols-4 gap-2 overflow-y-auto overflow-hidden-scroll "style={{maxHeight: '110px'}}>
+                            <div className="grid grid-cols-4 gap-2 overflow-y-auto overflow-hidden-scroll "style={{maxHeight: '6.5rem'}}>
                                 {images && images.length > 0 ? (
                                     images.map((imgSrc, index) => (
                                         <img
@@ -79,7 +79,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                                             loading="lazy"
                                             src={imgSrc}
                                             alt={`Message ${index}`}
-                                            className="object-cover w-[80px] h-[80px] max-md:w-[50px] max-md:h-[50px] rounded-md shadow-lg cursor-pointer"
+                                            className="object-cover w-[7rem] h-[7rem] rounded-md cursor-pointer"
                                             onClick={() => setSelectedImgSrc(imgSrc)}
                                         />
                                     ))
@@ -89,7 +89,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                             </div>
                         )}
                     </div>
-                    <div className="flex justify-between items-center cursor-pointer text-white max-md:text-[12px] mt-4 mb-2"
+                    <div className="flex justify-between items-center cursor-pointer text-white text-[1.125rem] max-md:text-[12px] mt-4 mb-2"
                         onClick={() => setShowFiles(!showFiles)}>
                         <span>File</span>
                         <span className={`transition-transform ${showFiles ? '' : 'rotate-180'}`}>
@@ -100,7 +100,7 @@ function InfoMessage({ onClose, avatar, userName, images, files }) {
                     </div>
                     <div className="flex justify-center items-center w-full">
                         {showFiles && (
-                            <div className="flex flex-col gap-[10px] overflow-y-auto overflow-hidden-scroll w-full" style={{maxHeight:'200px'}}>
+                            <div className="flex flex-col gap-[10px] overflow-y-auto overflow-hidden-scroll w-full" style={{maxHeight:'15rem'}}>
                                 {files.length > 0 ? (
                                     files.map((file, index) => (
                                         <a
