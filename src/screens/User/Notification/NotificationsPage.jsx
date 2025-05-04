@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { getNotificationsByUser } from "../../../services/notification.service";
 import { io } from "socket.io-client"; // 👉 import socket
 
-const socket = io(process.env.REACT_APP_SOCKET_URL || "http://localhost:3001", {
+const socket = io(process.env.REACT_APP_API_BASE_URL, {
   withCredentials: true,
 }); // 👈 nhớ đúng URL server socket.io backend
 
