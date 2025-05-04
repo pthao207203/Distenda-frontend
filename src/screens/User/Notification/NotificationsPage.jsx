@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import NotificationCard from "./NotificationCard";
 import Cookies from "js-cookie";
 import { getNotificationsByUser } from "../../../services/notification.service";
-import { io } from "socket.io-client"; // 👉 import socket
+// import { io } from "socket.io-client"; // 👉 import socket
 
 // const socket = io(process.env.REACT_APP_API_BASE_URL, {
 //   withCredentials: true,
