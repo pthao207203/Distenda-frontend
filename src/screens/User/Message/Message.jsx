@@ -15,38 +15,7 @@ import {
 import { getMessages } from "../../../services/message.service";
 import { io } from "socket.io-client";
 
-
 const Message = () => {
-    const [instructors, setInstructors] = useState([]);
-    const [selectedInstructor, setSelectedInstructor] = useState(null);
-    const [message, setMessages] = useState([]);
-    const [messagesByInstructor, setMessagesByInstructor] = useState({});
-    const [newMessage, setNewMessage] = useState('');
-    const token = Cookies.get('user_token');
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [previewImageUrl, setPreviewImageUrl] = useState(null);
-    const uploadImagePreviewRef = useRef(null);
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const [popupImageSrc, setPopupImageSrc] = useState(null);
-    const [isInfoMessagePopupOpen, setIsInfoMessagePopupOpen] = useState(false);
-    const [infoImages, setInfoImages] = useState([]);  // State lưu danh sách ảnh
-    const [infoFiles, setInfoFiles] = useState([]);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const chatContainerRef = useRef(null);
-   const socketRef = useRef(null);
-    const selectedInstructorRef = useRef(null);
-    const [currentUser, setCurrentUser] = useState(null);
-    
-    useEffect(() => {
-      selectedInstructorRef.current = selectedInstructor;
-    }, [selectedInstructor]);
-
-    useEffect(() => {
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-      }
-    }, [message]);
-  
   const [instructors, setInstructors] = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [message, setMessages] = useState([]);
@@ -63,6 +32,20 @@ const Message = () => {
   const [infoFiles, setInfoFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const chatContainerRef = useRef(null);
+  const socketRef = useRef(null);
+  const selectedInstructorRef = useRef(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    selectedInstructorRef.current = selectedInstructor;
+  }, [selectedInstructor]);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [message]);
 
   const openInfoMessagePopup = () => {
     if (message.length > 0) {
@@ -200,18 +183,18 @@ const Message = () => {
       return updated;
     });
 
-        // 2️⃣ Gửi lên server
-        const messageData = {
-            receiverId: selectedInstructor.instructorId,
-            receiverRole: 'admin',
-            content: (newMessage || '').trim(),  // Content có thể là chuỗi rỗng
-            image: uploadedImageUrl || '', // Image có thể là null hoặc chuỗi rỗng
-            file: uploadedFileData || {},
-            sender: {
-              userId: currentUser._id,
-              senderRole: 'user'
-            }
-        };
+    // 2️⃣ Gửi lên server
+    const messageData = {
+      receiverId: selectedInstructor.instructorId,
+      receiverRole: "admin",
+      content: (newMessage || "").trim(), // Content có thể là chuỗi rỗng
+      image: uploadedImageUrl || "", // Image có thể là null hoặc chuỗi rỗng
+      file: uploadedFileData || {},
+      sender: {
+        userId: currentUser._id,
+        senderRole: "user",
+      },
+    };
 
     setNewMessage("");
     setSelectedImage(null);
@@ -224,13 +207,12 @@ const Message = () => {
       if (!sentMsg.sender?.userId) {
         sentMsg.sender = {
           userId: currentUser._id,
-          senderRole: 'user',
+          senderRole: "user",
         };
       }
       sentMsg.receiverId = sentMsg.receiver?.userId;
       sentMsg.receiverRole = sentMsg.receiver?.receiverRole;
-    
-    
+
       socketRef.current?.emit("sendMessage", sentMsg);
 
       setMessagesByInstructor((prev) => {
@@ -279,194 +261,168 @@ const Message = () => {
       // ✅ Đánh dấu tin nhắn là đã đọc
       await updateMessageStatus(teacher.instructorId);
 
-            // 🔄 Cập nhật lại messagesByInstructor
-            setMessagesByInstructor(prev => {
-                const updated = { ...prev };
-                if (updated[teacher.instructorId]) {
-                    updated[teacher.instructorId] = updated[teacher.instructorId].map(msg =>
-                        msg.sender?.senderRole === 'admin' ? { ...msg, isRead: true } : msg
-                    );
-                }
-                return updated;
-            });
-        } catch (error) {
-            console.error("❌ Lỗi khi lấy tin nhắn:", error);
+      // 🔄 Cập nhật lại messagesByInstructor
+      setMessagesByInstructor((prev) => {
+        const updated = { ...prev };
+        if (updated[teacher.instructorId]) {
+          updated[teacher.instructorId] = updated[teacher.instructorId].map(
+            (msg) =>
+              msg.sender?.senderRole === "admin"
+                ? { ...msg, isRead: true }
+                : msg
+          );
         }
-    };
-   
-    useEffect(() => {
-      const fetchUser = async () => {
-        try {
-          const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/user/me`, {
+        return updated;
+      });
+    } catch (error) {
+      console.error("❌ Lỗi khi lấy tin nhắn:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/user/me`,
+          {
             withCredentials: true,
+          }
+        );
+
+        const userId = res.data?._id;
+        setCurrentUser(res.data);
+
+        if (!userId) return;
+
+        const socket = io(`${process.env.REACT_APP_API_BASE_URL}`, {
+          query: {
+            userId,
+            role: "user", // hoặc 'admin'
+          },
+          withCredentials: true,
+        });
+
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+          console.log("✅ Socket connected:", socket.id);
+        });
+
+        // 🟢 LẮP VÀO socket listener Ở ĐÂY (bên trong fetchUser)
+        socket.on("receiveMessage", (data) => {
+          const senderId = data.sender?.userId;
+          if (!senderId) return;
+
+          setMessagesByInstructor((prev) => {
+            const updated = { ...prev };
+            if (!updated[senderId]) updated[senderId] = [];
+            updated[senderId] = [...updated[senderId], data];
+            return updated;
           });
-    
-          const userId = res.data?._id;
-          setCurrentUser(res.data);
-    
-          if (!userId) return;
-    
-          const socket = io(`${process.env.REACT_APP_API_BASE_URL}`, {
-            query: {
-              userId,
-              role: 'user', // hoặc 'admin'
-            },
-            withCredentials: true
-          });
-    
-          socketRef.current = socket;
-    
-          socket.on("connect", () => {
-            console.log("✅ Socket connected:", socket.id);
-          });
-    
-          // 🟢 LẮP VÀO socket listener Ở ĐÂY (bên trong fetchUser)
-          socket.on("receiveMessage", (data) => {
-            const senderId = data.sender?.userId;
-            if (!senderId) return;
-    
-            setMessagesByInstructor((prev) => {
-              const updated = { ...prev };
-              if (!updated[senderId]) updated[senderId] = [];
-              updated[senderId] = [...updated[senderId], data];
-              return updated;
-            });
-    
-            if (
-              data.sender?.senderRole === 'admin' &&
-              selectedInstructorRef.current?.instructorId === data.sender?.userId
-            ) {
-              setMessages((prev) => [...prev, data]);
-              updateMessageStatus(data.sender.userId);
-            }
-            console.log("📩 Received message from socket:", data);
-          });
-    
-        } catch (error) {
-          console.error("❌ Không thể kết nối socket user:", error);
-        }
-      };
-    
-      fetchUser();
-    
-      return () => {
-        socketRef.current?.disconnect();
-      };
-    }, []);
-    
 
-    return (
-        <>
-            {instructors.length > 0 ? (
+          if (
+            data.sender?.senderRole === "admin" &&
+            selectedInstructorRef.current?.instructorId === data.sender?.userId
+          ) {
+            setMessages((prev) => [...prev, data]);
+            updateMessageStatus(data.sender.userId);
+          }
+          console.log("📩 Received message from socket:", data);
+        });
+      } catch (error) {
+        console.error("❌ Không thể kết nối socket user:", error);
+      }
+    };
 
-                <main className="flex  h-fit overflow-hiden min-h-[calc(100vh-76px)] max-h-[calc(100vh-532px)] max-md:flex-col bg-none max-md:max-w-full">
+    fetchUser();
 
-                    <aside className="bg-black overflow-hidden-scroll flex-row md:order-2 min-w-fit min-h-full px-[1.25rem] py-[2rem] max-md:px-[0.5rem] max-md:py-[0.75rem] max-md:w-full max-xl:ml-0 max-md:pr-0 max-md:min-h-[60px]">
-                        <div className="flex flex-col text-[1.5rem] font-medium mb-4 text-white max-md:hidden">
-                            <div className="p-[0.625rem] bg-white bg-opacity-50 max-w-fit rounded-[0.5rem] sticky top-0">
-                                Hộp thư
-                            </div>
-                        </div>
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, []);
 
-                        <div className="max-md:flex max-md:overflow-y-auto overflow-x-auto overflow-hidden-scroll">
-                            <div className="max-md:flex text-white flex-nowrap md:space-y-4 max-md:space-x-4 max-md:min-w-screen max-w-fit">
-                                {(instructors || []).map((teacher, i) => {
-                                    const lastMessage = messagesByInstructor[teacher.instructorId]?.slice(-1)[0];
+  return (
+    <>
+      {instructors.length > 0 ? (
+        <main className="flex  h-fit overflow-hiden min-h-[calc(100vh-76px)] max-h-[calc(100vh-532px)] max-md:flex-col bg-none max-md:max-w-full">
+          <aside className="bg-black overflow-hidden-scroll flex-row md:order-2 min-w-fit min-h-full px-[1.25rem] py-[2rem] max-md:px-[0.5rem] max-md:py-[0.75rem] max-md:w-full max-xl:ml-0 max-md:pr-0 max-md:min-h-[60px]">
+            <div className="flex flex-col text-[1.5rem] font-medium mb-4 text-white max-md:hidden">
+              <div className="p-[0.625rem] bg-white bg-opacity-50 max-w-fit rounded-[0.5rem] sticky top-0">
+                Hộp thư
+              </div>
+            </div>
 
-                                    return (
-                                        <div
-                                            key={teacher.instructorId || i}
-                                            onClick={() => handleSelectInstructor(teacher)}
-                                            className="flex items-center max-w-fit"
-                                        >
-                                            <img
-                                                src={teacher.instructorAvatar || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5ebxW2tkf1OlwOYEF2K55p7OwwX9bhwsN6Q&s'}
-                                                alt="avatar"
-                                                className="h-[40px] max-w-[40px] min-w-[40px] mr-[10px] max-md:aspect-[1.25] rounded-full object-cover"
-                                            />
-                                            <div className="flex items-center justify-between space-y-0 max-md:hidden cursor-pointer">
-                                                <div className="flex-col justify-between space-y-2 w-full">
-                                                    <div className="text-[1.25rem] font-semibold cursor-pointer">
-                                                        {teacher.instructorName
-                                                            ? teacher.instructorName.split(" ").slice(-2).join(" ")
-                                                            : "Giáo viên"}
-                                                    </div>
-                                                    <div className="flex justify-between w-fit text-regular text-[1.125rem] text-white">
-                                                        {
-                                                            messagesByInstructor[teacher.instructorId]?.length > 0
-                                                                ? <>
-                                                                    <div
-                                                                        className="truncate leading-tight"
-                                                                        style={{
-                                                                            textOverflow: 'ellipsis',
-                                                                            whiteSpace: 'nowrap',
-                                                                            width: '9.375rem',  // 150px = 9.375rem
-                                                                            overflow: 'hidden',
-                                                                        }}
-                                                                    >
-                                                                        {lastMessage.image ? (
-                                                                            lastMessage.sender.senderRole === 'admin'
-                                                                                ? 'Bạn vừa nhận ảnh mới'
-                                                                                : 'Bạn đã gửi 1 ảnh'
-                                                                        ) : lastMessage.file && lastMessage.file.fileUrl ? (
-                                                                            lastMessage.sender.senderRole === 'admin'
-                                                                                ? 'Bạn vừa nhận file mới'
-                                                                                : 'Bạn đã gửi 1 file'
-                                                                        ) : (
-                                                                            lastMessage.content
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="whitespace-nowrap leading-tight xl:ml-[1.25rem] md:ml-[0.625rem]">
-                                                                        {new Date(messagesByInstructor[teacher.instructorId].slice(-1)[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                    </div>
-                                                                </>
-                                                                : <div className="truncate text-white text-regular text-[1.1245rem]">Chat ngay với giảng viên</div>
-                                                        }
-                                                    </div>
-                                                </div>
+            <div className="max-md:flex max-md:overflow-y-auto overflow-x-auto overflow-hidden-scroll">
+              <div className="max-md:flex text-white flex-nowrap md:space-y-4 max-md:space-x-4 max-md:min-w-screen max-w-fit">
+                {(instructors || []).map((teacher, i) => {
+                  const lastMessage =
+                    messagesByInstructor[teacher.instructorId]?.slice(-1)[0];
 
-                                                {
-                                                    messagesByInstructor[teacher.instructorId]?.some(msg => msg.isRead === false && msg.sender.senderRole === 'admin')
-                                                        ? <div className="w-[0.75rem] h-[0.75rem] rounded-full bg-[#CFF500] ml-[1rem] border border-black" />
-                                                        : <div className="w-[0.75rem] h-[0.75rem] rounded-full bg-none ml-[1rem]" style={{ visibility: 'hidden' }} />
-                                                }
-                                            </div>
-
-                                            {/* Dành cho mobile */}
-                                            <div className="md:hidden ml-auto">
-                                                {
-                                                    messagesByInstructor[teacher.instructorId]?.some(msg => msg.isRead === false && msg.sender.senderRole === 'admin') &&
-                                                    <div className="w-7 h-7 rounded-full bg-[#CFF500] border border-black max-md:mx-[-17px] max-md:mt-[25px]" />
-                                                }
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </aside>
-
-
-                    {/* Khung chat chính */}
-                    <div className="flex flex-col justify-between w-full max-w-full bg-none text-white  min-h-[calc(100vh-150px)]    ">
-                        <div className="flex items-center justify-between bg-none px-[20px] py-[12px] text-[12px] lg:text-[1.25rem]  font-semibold h-[50px]">
-                            <div className="flex items-center">
-                                <img
-                                    src={selectedInstructor?.instructorAvatar || 'https://cdn.builder.io/api/v1/image/assets/TEMP/bbae0514e8058efa2ff3c88f32951fbd7beba3099187677c6ba1c2f96547ea3f?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e'}
-                                    alt="avatar"
-                                    className="h-[40px] w-[40px] rounded-full object-cover"
-                                />
-                                <div className="pl-[20px]">{selectedInstructor?.instructorName || ''}</div>
-                            </div>
-                            <button
-                                onClick={openInfoMessagePopup}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 26 25" fill="none">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M13 1.875C7.14125 1.875 2.375 6.64125 2.375 12.5C2.375 18.3587 7.14125 23.125 13 23.125C18.8587 23.125 23.625 18.3587 23.625 12.5C23.625 6.64125 18.8587 1.875 13 1.875ZM13 25C6.1075 25 0.5 19.3925 0.5 12.5C0.5 5.6075 6.1075 0 13 0C19.8925 0 25.5 5.6075 25.5 12.5C25.5 19.3925 19.8925 25 13 25Z" fill="white" />
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12.9927 14.2161C12.4752 14.2161 12.0552 13.7961 12.0552 13.2786V7.75488C12.0552 7.23738 12.4752 6.81738 12.9927 6.81738C13.5102 6.81738 13.9302 7.23738 13.9302 7.75488V13.2786C13.9302 13.7961 13.5102 14.2161 12.9927 14.2161Z" fill="white" />
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M13.0048 18.4951C12.3135 18.4951 11.7485 17.9364 11.7485 17.2451C11.7485 16.5539 12.3023 15.9951 12.9923 15.9951H13.0048C13.696 15.9951 14.2548 16.5539 14.2548 17.2451C14.2548 17.9364 13.696 18.4951 13.0048 18.4951Z" fill="white" />
-                                </svg>
-                            </button>
-
+                  return (
+                    <div
+                      key={teacher.instructorId || i}
+                      onClick={() => handleSelectInstructor(teacher)}
+                      className="flex items-center max-w-fit"
+                    >
+                      <img
+                        src={
+                          teacher.instructorAvatar ||
+                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5ebxW2tkf1OlwOYEF2K55p7OwwX9bhwsN6Q&s"
+                        }
+                        alt="avatar"
+                        className="h-[40px] max-w-[40px] min-w-[40px] mr-[10px] max-md:aspect-[1.25] rounded-full object-cover"
+                      />
+                      <div className="flex items-center justify-between space-y-0 max-md:hidden cursor-pointer">
+                        <div className="flex-col justify-between space-y-2 w-full">
+                          <div className="text-[1.25rem] font-semibold cursor-pointer">
+                            {teacher.instructorName
+                              ? teacher.instructorName
+                                  .split(" ")
+                                  .slice(-2)
+                                  .join(" ")
+                              : "Giáo viên"}
+                          </div>
+                          <div className="flex justify-between w-fit text-regular text-[1.125rem] text-white">
+                            {messagesByInstructor[teacher.instructorId]
+                              ?.length > 0 ? (
+                              <>
+                                <div
+                                  className="truncate leading-tight"
+                                  style={{
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    width: "9.375rem", // 150px = 9.375rem
+                                    overflow: "hidden",
+                                  }}
+                                >
+                                  {lastMessage.image
+                                    ? lastMessage.sender.senderRole === "admin"
+                                      ? "Bạn vừa nhận ảnh mới"
+                                      : "Bạn đã gửi 1 ảnh"
+                                    : lastMessage.file &&
+                                      lastMessage.file.fileUrl
+                                    ? lastMessage.sender.senderRole === "admin"
+                                      ? "Bạn vừa nhận file mới"
+                                      : "Bạn đã gửi 1 file"
+                                    : lastMessage.content}
+                                </div>
+                                <div className="whitespace-nowrap leading-tight xl:ml-[1.25rem] md:ml-[0.625rem]">
+                                  {new Date(
+                                    messagesByInstructor[
+                                      teacher.instructorId
+                                    ].slice(-1)[0].createdAt
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="truncate text-white text-regular text-[1.1245rem]">
+                                Chat ngay với giảng viên
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {messagesByInstructor[teacher.instructorId]?.some(
@@ -550,7 +506,7 @@ const Message = () => {
             <div className="flex flex-col h-full overflow-hidden-scroll overflow-y-auto justify-between justify-items-between bg-white min-h-[calc(100vh-150px)] overflow-hidden-scroll bg-opacity-10 backdrop-blur-[20px] overflow-auto p-[20px] space-y-[1rem] text-[12px] lg:text-[1.25rem] ">
               <div
                 ref={chatContainerRef}
-                className="flex flex-col h-full overflow-y-auto overflow-hidden-scroll space-y-4"
+                className="flex flex-col h-full overflow-y-auto overflow-hidden-scroll space-y-4 overflow-y-auto"
                 style={{ maxHeight: "calc(100vh - 250px)" }}
               >
                 <div className="flex-col justify-start items-start">
