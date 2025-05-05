@@ -9,16 +9,15 @@ export default function HandlePayment() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const resultCode = params.get("resultCode"); // MoMo
-    const status = params.get("status");         // ZaloPay
-    const orderId =
-      params.get("orderId") || params.get("apptransid"); // dùng cho cả 2
+    const status = params.get("status"); // ZaloPay
+    const orderId = params.get("orderId") || params.get("apptransid"); // dùng cho cả 2
     const amount = params.get("amount");
 
     // Thanh toán thành công
     if (resultCode === "0" || status === "1") {
       axios
         .post(
-          "http://localhost:3001/payment/confirm",
+          `${process.env.REACT_APP_API_BASE_URL}/payment/confirm`,
           { orderId, amount },
           { withCredentials: true }
         )
@@ -48,7 +47,9 @@ export default function HandlePayment() {
 
   return (
     <>
-      {showPopup && <ThankYouPage onClose={handleClosePopup} content={popupContent} />}
+      {showPopup && (
+        <ThankYouPage onClose={handleClosePopup} content={popupContent} />
+      )}
       <div className="flex items-center justify-center h-screen">
         Đang xử lý thanh toán, vui lòng đợi...
       </div>
