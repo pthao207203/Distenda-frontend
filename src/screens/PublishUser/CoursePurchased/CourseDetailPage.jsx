@@ -7,7 +7,8 @@ import { getVideoStatusController } from "../../../controllers/user.controller";
 import { useParams } from "react-router-dom";
 import Rating from "./Rating";
 import { Helmet } from "react-helmet";
-import LoadingPopup from "../../../components/LoadingPopup";
+// import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 export default function CourseDetailPage() {
   const [data, setData] = useState();
@@ -56,16 +57,21 @@ export default function CourseDetailPage() {
   console.log("videoStatusList", videoStatusList);
   console.log("lessonRateMap", lessonRateMap);
   console.log("progressStatus", progressStatus);
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>{data ? data.CourseName : "Chi tiết khoá học"}</title>
       </Helmet>
 
-      {loading && <LoadingPopup />}
+      {/* {loading && <LoadingPopup />} */}
 
       <div className="flex overflow-hidden flex-col">
-        <CourseHeader {...data} progressStatus={progressStatus} onOpenCertificate={() => setShowCertificate(true)} />
+        <CourseHeader
+          {...data}
+          progressStatus={progressStatus}
+          onOpenCertificate={() => setShowCertificate(true)}
+        />
         <div className="flex z-10 flex-col lg:px-[6rem] mt-0 w-full bg-white bg-opacity-10 min-h-screen max-lg:mt-0 max-lg:px-[20px] max-lg:max-w-full">
           <CourseContent
             {...data}
@@ -82,14 +88,14 @@ export default function CourseDetailPage() {
 
         {/* Render popup ở cuối cùng */}
         {showCertificate && (
-        <CertificatePopup
-        userName={data?.user?.UserFullName || "Tên học viên"}
-        courseName={data?.CourseName || "Tên khoá học"}
-        instructorName={data?.intructor?.AdminFullName || "Tên giảng viên"}
-        onClose={() => setShowCertificate(false)}
-      />
-      )}
+          <CertificatePopup
+            userName={data?.user?.UserFullName || "Tên học viên"}
+            courseName={data?.CourseName || "Tên khoá học"}
+            instructorName={data?.intructor?.AdminFullName || "Tên giảng viên"}
+            onClose={() => setShowCertificate(false)}
+          />
+        )}
       </div>
-      </>
-    );
+    </>
+  );
 }

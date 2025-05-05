@@ -3,7 +3,8 @@ import { Helmet } from "react-helmet";
 import CourseCard from "./CourseCard";
 // import SearchBar from "../Course/SearchBar"; // Import SearchBar
 import { coursesPurchasedController } from "../../../controllers/course.controller";
-import LoadingPopup from "../../../components/LoadingPopup";
+// import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 function CoursePage() {
   const [data, setData] = useState();
@@ -22,13 +23,13 @@ function CoursePage() {
   }, []);
 
   // console.log("courses => ", data)
-
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>Khoá học của tôi</title>
       </Helmet>
-      {loading && <LoadingPopup />}
+      {/* {loading && <LoadingPopup />} */}
       <div className="flex flex-col w-full min-h-screen">
         {/* Nội dung chính */}
         <main>
