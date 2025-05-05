@@ -10,33 +10,28 @@ export default function HandlePayment() {
     const params = new URLSearchParams(window.location.search);
     const resultCode = params.get("resultCode"); // MoMo
     const status = params.get("status");         // ZaloPay
-    const orderId =
-      params.get("orderId") || params.get("apptransid"); // dùng cho cả 2
+    const orderId = params.get("orderId") || params.get("apptransid");
     const amount = params.get("amount");
 
-    // Thanh toán thành công
-    if (resultCode === "0" || status === "1") {
+    const isSuccessMoMo = resultCode === "0";
+    const isSuccessZalo = status === "1";
+
+    if ((isSuccessMoMo || isSuccessZalo) && orderId && amount) {
       axios
         .post(
-          "http://localhost:3001/payment/confirm",
+          `${process.env.REACT_APP_API_BASE_URL}/payment/confirm`,
           { orderId, amount },
           { withCredentials: true }
         )
         .then((res) => {
-          setPopupContent("Thanh toán thành công! Khóa học đã được kích hoạt.");
-          setShowPopup(true);
+          setPopupContent("✅ Thanh toán thành công! Khóa học đã được kích hoạt.");
         })
         .catch((err) => {
-          if (err.response) {
-            setPopupContent(`${err.response.data.message}`);
-          } else {
-            setPopupContent("Lỗi kết nối server!");
-          }
-          setShowPopup(true);
-        });
+          setPopupContent(err?.response?.data?.message || "❌ Lỗi xác nhận thanh toán.");
+        })
+        .finally(() => setShowPopup(true));
     } else {
-      // Thanh toán thất bại
-      setPopupContent("Thanh toán thất bại hoặc bị hủy!");
+      setPopupContent("❌ Thanh toán thất bại hoặc bị hủy!");
       setShowPopup(true);
     }
   }, []);
@@ -48,10 +43,14 @@ export default function HandlePayment() {
 
   return (
     <>
-      {showPopup && <ThankYouPage onClose={handleClosePopup} content={popupContent} />}
-      <div className="flex items-center justify-center h-screen">
-        Đang xử lý thanh toán, vui lòng đợi...
-      </div>
+      {showPopup && (
+        <ThankYouPage onClose={handleClosePopup} content={popupContent} />
+      )}
+      {!showPopup && (
+        <div className="flex items-center justify-center h-screen text-lg">
+          ⏳ Đang xử lý thanh toán, vui lòng đợi...
+        </div>
+      )}
     </>
   );
 }
