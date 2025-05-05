@@ -1,7 +1,7 @@
 import * as React from "react";
 import CourseLesson from "./CourseLesson";
 
-export default function CourseContent(course) {
+export default function CourseContent({markVideoAsCompleted,...course}) {
   const lessons = course.lesson;
   const {
     videoStatusList = {},
@@ -24,6 +24,7 @@ export default function CourseContent(course) {
               videoStatusList={videoStatusList}
               completionRate={lessonRateMap[lesson._id] ?? 0}
               key={index}
+              markVideoAsCompleted={markVideoAsCompleted}
             />
           ))}
       </div>

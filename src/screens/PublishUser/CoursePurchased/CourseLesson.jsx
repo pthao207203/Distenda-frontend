@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { CircularProgressbar } from "react-circular-progressbar";
 import { useMediaQuery } from "react-responsive";
 
-export default function CourseLesson({ courseSlug,videoStatusList,completionRate, ...lesson }) {
+export default function CourseLesson({ markVideoAsCompleted,courseSlug,videoStatusList,completionRate, ...lesson }) {
   const videos = lesson.video;
   const percentage = Math.round(completionRate * 100);
   const isMobile = useMediaQuery({ maxWidth: 1024 });
@@ -46,6 +46,7 @@ export default function CourseLesson({ courseSlug,videoStatusList,completionRate
             videos.map((topic, index) => (
               <Link
                 to={`/courses/CoursePurchased/${courseSlug}/${topic.VideoSlug}`}
+                onClick={() => markVideoAsCompleted(topic._id)}
                 key={index}
                 className="flex gap-3 items-center justify-between px-3 lg:py-3 w-full bg-white bg-opacity-10 max-lg:py-[1rem] hover:text-[#CDD5DF] transition"
               >

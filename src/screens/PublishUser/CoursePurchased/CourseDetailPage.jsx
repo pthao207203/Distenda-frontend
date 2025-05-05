@@ -3,7 +3,7 @@ import CourseHeader from "./CourseHeader";
 import CourseContent from "./CourseContent";
 import CertificatePopup from "./CertificatePopup";
 import { courseDetailController } from "../../../controllers/course.controller";
-import { getVideoStatusController } from "../../../controllers/user.controller";
+import { getVideoStatusController, userMarkVideoCompletedController } from "../../../controllers/user.controller";
 import { useParams } from "react-router-dom";
 import Rating from "./Rating";
 import { Helmet } from "react-helmet";
@@ -53,6 +53,23 @@ export default function CourseDetailPage() {
       }
     })();
   }, [CourseSlug]);
+
+  // 3) Đánh dấu hoàn thành
+    const markVideoAsCompleted = async (videoId) => {
+      if (!data) return;
+      try {
+        const resp = await userMarkVideoCompletedController({
+          courseId: data._id,
+          videoId,
+        });
+        if (resp) {
+          setVideoStatusList((prev) => ({ ...prev, [videoId]: 1 }));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  console.log("video ", data);
   console.log("data", data);
   console.log("videoStatusList", videoStatusList);
   console.log("lessonRateMap", lessonRateMap);
@@ -77,6 +94,7 @@ export default function CourseDetailPage() {
             {...data}
             videoStatusList={videoStatusList}
             lessonRateMap={lessonRateMap}
+            markVideoAsCompleted={markVideoAsCompleted}
           />
           <Rating
             setLoading={setLoading}
