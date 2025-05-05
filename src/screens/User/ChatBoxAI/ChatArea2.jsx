@@ -7,7 +7,8 @@ function ChatArea2({ messages }) {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -15,7 +16,7 @@ function ChatArea2({ messages }) {
     <div
       ref={chatContainerRef}
       className="flex overflow-y-auto flex-col h-full px-10 pt-2 max-md:px-5 max-md:max-w-full"
-      style={{ maxHeight: "calc(100vh - 250px)" }} 
+      style={{ maxHeight: "calc(100vh - 250px)" }}
     >
       {messages.map((message, index) => (
         <ChatMessage

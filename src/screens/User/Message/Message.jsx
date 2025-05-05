@@ -344,7 +344,7 @@ const Message = () => {
   return (
     <>
       {instructors.length > 0 ? (
-        <main className="flex  h-fit overflow-hiden min-h-[calc(100vh-76px)] max-h-[calc(100vh-532px)] max-md:flex-col bg-none max-md:max-w-full">
+        <main className="flex  h-fit overflow-hiden min-h-[calc(100vh-3.0125rem)] max-h-[calc(100vh-532px)] max-md:flex-col bg-none max-md:max-w-full">
           <aside className="bg-black overflow-hidden-scroll flex-row md:order-2 min-w-fit min-h-full px-[1.25rem] py-[2rem] max-md:px-[0.5rem] max-md:py-[0.75rem] max-md:w-full max-xl:ml-0 max-md:pr-0 max-md:min-h-[60px]">
             <div className="flex flex-col text-[1.5rem] font-medium mb-4 text-white max-md:hidden">
               <div className="p-[0.625rem] bg-white bg-opacity-50 max-w-fit rounded-[0.5rem] sticky top-0">
@@ -506,7 +506,7 @@ const Message = () => {
             <div className="flex flex-col h-full overflow-hidden-scroll overflow-y-auto justify-between justify-items-between bg-white min-h-[calc(100vh-150px)] overflow-hidden-scroll bg-opacity-10 backdrop-blur-[20px] overflow-auto p-[20px] space-y-[1rem] text-[12px] lg:text-[1.25rem] ">
               <div
                 ref={chatContainerRef}
-                className="flex flex-col h-full overflow-y-auto overflow-hidden-scroll space-y-4 overflow-y-auto"
+                className="flex flex-col h-full overflow-hidden-scroll space-y-4 overflow-y-auto"
                 style={{ maxHeight: "calc(100vh - 250px)" }}
               >
                 <div className="flex-col justify-start items-start">
