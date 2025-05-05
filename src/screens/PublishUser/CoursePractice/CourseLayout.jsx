@@ -10,6 +10,7 @@ import {
 } from "../../../controllers/user.controller";
 import { Helmet } from "react-helmet";
 import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 function CourseLayout() {
   const [data, setData] = useState();
@@ -71,6 +72,7 @@ function CourseLayout() {
   };
   console.log("video ", data);
 
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
