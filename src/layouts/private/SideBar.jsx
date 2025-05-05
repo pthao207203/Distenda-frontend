@@ -21,7 +21,7 @@ const SideBar = ({ headerHeight }) => {
     { name: "Đang học", link: "/courses/CourseStudying" },
     { name: "Đã hoàn thành", link: "/courses/CourseCompleted" },
     { name: "Chatbox AI", link: "/user/aichating" },
-    { name: "Tin nhắn", link: "/user/message"},
+    { name: "Tin nhắn", link: "/user/message" },
   ];
 
   // Kiểm tra kích thước màn hình
@@ -110,7 +110,7 @@ const SideBar = ({ headerHeight }) => {
 
     checkAndSendRankNotification();
   }, [data?.setting?.user?.UserMoney, member, userToken]); // Thêm userToken vào dependency array
-
+  console.log("sidebar data", data);
   return (
     <>
       {/* Lớp phủ toàn màn hình khi Sidebar mở */}
