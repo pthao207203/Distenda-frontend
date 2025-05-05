@@ -8,7 +8,8 @@ import { categoryController } from "../../../controllers/category.controller";
 //import TeacherSection from "./TeacherSection"; // Import TeacherSection
 import Banner from "../Course/Banner";
 import { Helmet } from "react-helmet";
-import LoadingPopup from "../../../components/LoadingPopup";
+// import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 function CategoryPage() {
   const [allCourses, setAllCourses] = useState([]);
@@ -44,13 +45,14 @@ function CategoryPage() {
 
   console.log("courses => ", allCourses);
 
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>{category ? category : "Danh mục"}</title>
       </Helmet>
 
-      {loading && <LoadingPopup />}
+      {/* {loading && <LoadingPopup />} */}
       <div className="flex flex-col w-full min-h-screen">
         {/* Nội dung chính */}
         <main>

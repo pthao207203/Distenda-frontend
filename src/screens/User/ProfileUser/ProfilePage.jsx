@@ -8,10 +8,12 @@ import {
 import axios from "axios";
 import ThankYouPage from "../Payment/ThankYouPage";
 import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 function ProfilePage() {
   let [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingPopup, setLoadingPopup] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [isThankVisible, setIsThankVisible] = useState(false);
 
@@ -54,7 +56,7 @@ function ProfilePage() {
 
   // Xử lý cập nhật dữ liệu
   const handleSubmit = async (formData) => {
-    setLoading(true);
+    setLoadingPopup(true);
 
     try {
       let uploadedImageUrl = data?.UserAvatar; // URL ảnh hiện tại (nếu không có ảnh mới)
@@ -82,6 +84,7 @@ function ProfilePage() {
       console.log("form", updatedData);
 
       const response = await userPostController(updatedData); // Gửi dữ liệu cập nhật
+      setLoadingPopup(false);
       if (response.code === 200) {
         setIsThankVisible(true);
         setData((prevData) => ({
@@ -91,19 +94,20 @@ function ProfilePage() {
         }));
       }
     } catch (error) {
+      setLoadingPopup(false);
       console.error("Error updating user data:", error);
       alert("Cập nhật thất bại. Vui lòng thử lại.");
     } finally {
-      setLoading(false);
+      setLoadingPopup(false);
     }
   };
-
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>Thông tin cá nhân</title>
       </Helmet>
-      {loading && <LoadingPopup />}
+      {loadingPopup && <LoadingPopup />}
       <div
         className="flex flex-col w-full min-h-screen"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.03)" }}

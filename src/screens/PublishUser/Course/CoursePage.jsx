@@ -7,7 +7,8 @@ import { coursesController } from "../../../controllers/course.controller";
 //import TestimonialSection from "./TestimonialSection"; // Import TestimonialSection
 //import TeacherSection from "./TeacherSection"; // Import TeacherSection
 import Banner from "./Banner";
-import LoadingPopup from "../../../components/LoadingPopup";
+// import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 function CoursePage() {
   const [allCourses, setAllCourses] = useState([]);
@@ -39,13 +40,14 @@ function CoursePage() {
   // }
   // console.log("courses => ", filteredCourses);
 
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>Khóa học</title>
       </Helmet>
 
-      {loading && <LoadingPopup />}
+      {/* {loading && <LoadingPopup />} */}
       <div className="flex flex-col w-full min-h-screen">
         {/* Sidebar */}
         {/*<SideBar />*/}

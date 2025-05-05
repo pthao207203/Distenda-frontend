@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import NotificationCard from "./NotificationCard";
 import Cookies from "js-cookie";
 import { getNotificationsByUser } from "../../../services/notification.service";
+import Loading from "../../../components/Loading";
 // import { io } from "socket.io-client"; // 👉 import socket
 
 // const socket = io(process.env.REACT_APP_API_BASE_URL, {
@@ -10,12 +11,14 @@ import { getNotificationsByUser } from "../../../services/notification.service";
 
 function NotificationsPage() {
   const [dynamicNotifications, setDynamicNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       const token = Cookies.get("user_token");
 
       if (token) {
+        setLoading(true);
         await fetch(
           `${process.env.REACT_APP_API_BASE_URL}/notification/check-expiry`,
           {
@@ -43,6 +46,7 @@ function NotificationsPage() {
         } else {
           setDynamicNotifications([]);
         }
+        setLoading(false);
       }
     };
 
@@ -64,7 +68,7 @@ function NotificationsPage() {
     const dateB = new Date(`${b.date} ${b.time}`);
     return dateB - dateA;
   });
-
+  if (loading) return <Loading />;
   return (
     <main className="flex relative max-md:flex-col bg-white bg-opacity-10 backdrop-blur-[10px] pb-[129px] px-[33px] max-md:pb-24 max-md:max-w-full">
       {/* Content Area */}
