@@ -11,6 +11,7 @@ import ThankYouPage from "../../User/Payment/ThankYouPage";
 import { exerciseController } from "../../../controllers/video.controller";
 import { Helmet } from "react-helmet";
 import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 function CourseLayout() {
   const [data, setData] = useState();
@@ -18,6 +19,7 @@ function CourseLayout() {
   const [content, setContent] = useState();
   const [submit, setSubmit] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingPopup, setLoadingPopup] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
   const navigate = useNavigate();
 
@@ -47,10 +49,11 @@ function CourseLayout() {
 
   const handleButton = async (actionType) => {
     if (actionType === "check") {
+      setLoadingPopup(true)
       const result = await exerciseCheckController(
         code,
         ExerciseSlug,
-        data.course.CourseLanguage
+        data.ExerciseLanguage
       );
       console.log("result", result);
       if (result.code === 200) {
@@ -66,8 +69,10 @@ function CourseLayout() {
       if (result?.passedTests === result?.totalTests) {
         setSubmit(true);
       }
+      setLoadingPopup(false)
       setPopupVisible(true);
     } else if (actionType === "submit") {
+      setLoadingPopup(true)
       const result = await exerciseSubmitController(ExerciseSlug);
       if (result.code === 200) {
         console.log(result.testcase);
@@ -75,6 +80,7 @@ function CourseLayout() {
         console.log(result.error);
       }
       setContent(`Nộp bài thành công!`);
+      setLoadingPopup(false)
       setPopupVisible(true);
       setTimeout(() => {
         navigate(`/courses/CoursePurchased/${data.course.CourseSlug}`);
@@ -87,13 +93,14 @@ function CourseLayout() {
     document.body.style.overflow = "auto";
   };
 
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>{data ? data.ExerciseName : "Bài tập"}</title>
       </Helmet>
 
-      {loading && <LoadingPopup />}
+      {loadingPopup && <LoadingPopup />}
       <div className="flex flex-col self-start">
         <div className="flex relative flex-col lg:py-0.5 w-full max-md:max-w-full self-start">
           <BreadcrumbNav {...data} />

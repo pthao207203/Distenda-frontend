@@ -7,8 +7,9 @@ import TeacherSection from "./TeacherSection";
 //import Footer from './Footer';
 import { Container, Row, Col } from "react-bootstrap";
 import { homeController } from "../../../controllers/home.controller";
-import LoadingPopup from "../../../components/LoadingPopup";
+// import LoadingPopup from "../../../components/LoadingPopup";
 import { Helmet } from "react-helmet";
+import Loading from "../../../components/Loading";
 
 function LandingPage() {
   const [data, setData] = useState({
@@ -30,12 +31,14 @@ function LandingPage() {
 
   console.log("intructor ", data.intructor);
   console.log("courses ", data.courses);
+
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>Trang chủ</title>
       </Helmet>
-      {loading && <LoadingPopup />}
+      {/* {loading && <LoadingPopup />} */}
       {/* Hero Section */}
       <section className="py-5 w-full text-white px-1 hidden lg:block">
         <Container fluid className="px-0">

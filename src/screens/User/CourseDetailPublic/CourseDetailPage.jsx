@@ -10,16 +10,17 @@ import {
   courseDetailController,
   coursePayController,
 } from "../../../controllers/course.controller";
-import { useOutletContext } from "react-router-dom";
+// import { useOutletContext } from "react-router-dom";
 import { addNotification } from "../../../services/notification.service";
 import { Helmet } from "react-helmet";
-import LoadingPopup from "../../../components/LoadingPopup";
+// import LoadingPopup from "../../../components/LoadingPopup";
+import Loading from "../../../components/Loading";
 
 export default function CourseDetailPage() {
-  const { headerHeight } = useOutletContext(); // Nhận giá trị từ context
+  // const { headerHeight } = useOutletContext(); // Nhận giá trị từ context
 
   // Dùng headerHeight trong việc bố trí giao diện hoặc logic
-  console.log("Header Height:", headerHeight);
+  // console.log("Header Height:", headerHeight);
   const [isLoginRequestVisible, setIsLoginRequestVisible] = useState(false);
 
   const handleOpenLoginRequest = () => {
@@ -141,19 +142,20 @@ export default function CourseDetailPage() {
 
   console.log("course => ", data);
 
+  if (loading) return <Loading />;
   return (
     <>
       <Helmet>
         <title>{data ? data.CourseName : "Chi tiết khoá học"}</title>
       </Helmet>
 
-      {loading && <LoadingPopup />}
+      {/* {loading && <LoadingPopup />} */}
       <div className="flex flex-col relative w-full h-full overflow-y-auto">
         {/* <PageNav {...data} /> */}
         {/* CourseContent nhận hàm handleOpenPayment */}
         <CourseContent
           {...data}
-          headerHeight={headerHeight}
+          // headerHeight={headerHeight}
           onRegister={
             isAuthenticated ? handleOpenPayment : handleOpenLoginRequest
           }

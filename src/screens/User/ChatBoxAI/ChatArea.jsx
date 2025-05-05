@@ -1,6 +1,6 @@
 // src/ChatArea.jsx
 import React from "react";
-import ChatSuggestion from "./components/ChatSuggestion";  
+import ChatSuggestion from "./components/ChatSuggestion";
 
 const suggestions = [
   "Hãy giới thiệu cho tôi vài khóa học cho người mới bắt đầu!",
@@ -10,23 +10,25 @@ const suggestions = [
 
 const ChatArea = ({ onSuggestionClick }) => {
   return (
-    <section className="mb-10 mt-10 items-center justify-between">
-      <h2 className="mb-10 text-[1.75rem] text-center text-white">
-        Chào mừng đến với Chat bot AI! Chúng tôi có thể giúp gì cho bạn?
-      </h2>
+    <>
+      <section className="mb-10 mt-10 mx-[2px] items-center justify-between">
+        <h2 className="mb-10 text-[1.75rem] max-lg:text-[16px] text-center text-white">
+          Chào mừng đến với Chat bot AI! Chúng tôi có thể giúp gì cho bạn?
+        </h2>
 
-      <div className="flex flex-col gap-[1.25rem] mb-10 items-center">
-        {suggestions.map((suggestion, index) => (
-          <div
-            key={index}
-            onClick={() => onSuggestionClick(suggestion)}  
-            className="cursor-pointer text-blue-500 hover:text-blue-700"
-          >
-            <ChatSuggestion text={suggestion} /> 
-          </div>
-        ))}
-      </div>
-    </section>
+        <div className="flex flex-col gap-[1.25rem] mb-10 items-center">
+          {suggestions.map((suggestion, index) => (
+            <div
+              key={index}
+              onClick={() => onSuggestionClick(suggestion)}
+              className="cursor-pointer text-blue-500 hover:text-blue-700"
+            >
+              <ChatSuggestion text={suggestion} />
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 };
 

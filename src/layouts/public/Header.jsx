@@ -44,8 +44,8 @@ export default function Header({ setHeight }) {
   if (loading) {
     return <div>Đang tải...</div>;
   }
-  console.log("category ", data.category);
-  console.log("setting ", data.setting);
+  console.log("category ", data?.category);
+  console.log("setting ", data?.setting);
 
   return (
     <header

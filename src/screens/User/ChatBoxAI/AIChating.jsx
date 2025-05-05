@@ -6,21 +6,27 @@ import ChatArea from "./ChatArea";
 import ChatArea2 from "./ChatArea2";
 import ChatingInput from "./ChatingInput";
 import { getGeminiReply } from "./gemini";
+import Loading from "../../../components/Loading";
+import LoadingMessage from "../../../components/LoadingMessage";
 
 function AIChating() {
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const [messages, setMessages] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [globalContext, setGlobalContext] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingPopup, setLoadingPopup] = useState(false);
 
   // const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   // Lấy thông tin user và context khi mở ChatBot
   useEffect(() => {
     const initChatbot = async () => {
+      setLoading(true);
       try {
+        console.log(`${process.env.REACT_APP_API_BASE_URL}/user/me`);
         const resUser = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URLL}/user/me`,
+          `${process.env.REACT_APP_API_BASE_URL}/user/me`,
           {
             withCredentials: true,
           }
@@ -34,11 +40,14 @@ function AIChating() {
       } catch (err) {
         console.error("Lỗi khởi tạo chatbot:", err);
       }
+      setLoading(false);
     };
     initChatbot();
   }, []);
 
   const handleSendMessage = async (newMessage) => {
+    setLoadingPopup(true);
+    console.log("bật");
     if (!globalContext) {
       console.warn("⚠️ Đang tải dữ liệu, vui lòng đợi...");
       return;
@@ -54,13 +63,11 @@ function AIChating() {
     const lowerCaseMsg = newMessage.message.toLowerCase();
 
     // Kiểm tra câu hỏi về phương thức thanh toán
-    const isPaymentMethodQuestion = (
-      lowerCaseMsg.includes("phương thức") && lowerCaseMsg.includes("thanh toán")
-   ) || (
-      lowerCaseMsg.includes("thanh toán bằng")
-   ) || (
-      lowerCaseMsg.includes("cách thanh toán")
-   );   
+    const isPaymentMethodQuestion =
+      (lowerCaseMsg.includes("phương thức") &&
+        lowerCaseMsg.includes("thanh toán")) ||
+      lowerCaseMsg.includes("thanh toán bằng") ||
+      lowerCaseMsg.includes("cách thanh toán");
 
     if (isPaymentMethodQuestion) {
       const botMessage = {
@@ -107,6 +114,7 @@ function AIChating() {
     };
 
     setMessages((prev) => [...prev, botMessage]);
+    setLoadingPopup(false);
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -117,7 +125,7 @@ function AIChating() {
     };
     handleSendMessage(newMessage);
   };
-
+  if (loading) return <Loading />;
   return (
     <main className="h-screen w-full flex flex-col bg-center bg-cover backdrop-blur-[10px] max-md:px-5 max-h-[calc(100vh-100px)]">
       <div className="flex-1 flex flex-col justify-center max-h-[calc(100vh-200px)]">
@@ -127,8 +135,18 @@ function AIChating() {
           <ChatArea onSuggestionClick={handleSuggestionClick} />
         )}
       </div>
-      <div className="flex justify-center">
-        <ChatingInput onSendMessage={handleSendMessage} />
+      <div className="flex-col w-full justify-center">
+        {loadingPopup && (
+          <div className="w-full flex items-center justify-center">
+            <div className="w-[80%] items-start max-lg:mb-[12px] mb-3">
+              <LoadingMessage />
+            </div>
+          </div>
+        )}
+        <ChatingInput
+          onSendMessage={handleSendMessage}
+          setLoadingPopup={setLoadingPopup}
+        />
       </div>
     </main>
   );
