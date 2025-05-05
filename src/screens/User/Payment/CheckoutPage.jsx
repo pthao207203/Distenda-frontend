@@ -18,6 +18,7 @@ export default function CheckoutPage({ onClose, ...course }) {
   const finalPrice = useMemo(() => {
     if (course.CoursePrice === 0) return "Miễn phí";
     return Math.max(originalPrice - discountAmount, 0).toLocaleString("vi-VN");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalPrice, discountAmount]);
 
   const productDetails = {
