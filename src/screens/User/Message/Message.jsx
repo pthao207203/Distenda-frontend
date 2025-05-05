@@ -14,14 +14,15 @@ import {
 } from "../../../controllers/message.controller";
 import { getMessages } from "../../../services/message.service";
 import { io } from "socket.io-client";
+import Loading from "../../../components/Loading";
 
 const Message = () => {
+  const token = Cookies.get("user_token");
   const [instructors, setInstructors] = useState([]);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [message, setMessages] = useState([]);
   const [messagesByInstructor, setMessagesByInstructor] = useState({});
   const [newMessage, setNewMessage] = useState("");
-  const token = Cookies.get("user_token");
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewImageUrl, setPreviewImageUrl] = useState(null);
   const uploadImagePreviewRef = useRef(null);
@@ -35,17 +36,7 @@ const Message = () => {
   const socketRef = useRef(null);
   const selectedInstructorRef = useRef(null);
   const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    selectedInstructorRef.current = selectedInstructor;
-  }, [selectedInstructor]);
-
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  }, [message]);
+  const [loading, setLoading] = useState(false);
 
   const openInfoMessagePopup = () => {
     if (message.length > 0) {
@@ -80,15 +71,82 @@ const Message = () => {
     setPopupImageSrc(null);
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/user/me`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        const userId = res.data?._id;
+        setCurrentUser(res.data);
+
+        if (!userId) return;
+
+        const socket = io(`${process.env.REACT_APP_API_BASE_URL}`, {
+          query: {
+            userId,
+            role: "user", // hoặc 'admin'
+          },
+          withCredentials: true,
+        });
+
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+          console.log("✅ Socket connected:", socket.id);
+        });
+
+        // 🟢 LẮP VÀO socket listener Ở ĐÂY (bên trong fetchUser)
+        socket.on("receiveMessage", (data) => {
+          const senderId = data.sender?.userId;
+          if (!senderId) return;
+
+          setMessagesByInstructor((prev) => {
+            const updated = { ...prev };
+            if (!updated[senderId]) updated[senderId] = [];
+            updated[senderId] = [...updated[senderId], data];
+            return updated;
+          });
+
+          if (
+            data.sender?.senderRole === "admin" &&
+            selectedInstructorRef.current?.instructorId === data.sender?.userId
+          ) {
+            setMessages((prev) => [...prev, data]);
+            updateMessageStatus(data.sender.userId);
+          }
+          console.log("📩 Received message from socket:", data);
+        });
+      } catch (error) {
+        console.error("❌ Không thể kết nối socket user:", error);
+      }
+      setLoading(false);
+    };
+
+    fetchUser();
+
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, []);
+
   // 🔁 Load instructors khi vừa mở component
   useEffect(() => {
+    setLoading(true);
     loadInstructors(token, (data) => setInstructors(data || []));
+    setLoading(false);
   }, [token]);
 
   // 🔁 Khi instructors đã có, load tất cả tin nhắn để hiển thị ở sidebar
   useEffect(() => {
-    if (instructors.length > 0) {
+    if (instructors?.length > 0) {
       const fetchAllMessages = async () => {
+        setLoading(true);
         const groupedMessages = {};
         for (const instructor of instructors) {
           const res = await loadMessages(instructor.instructorId, token);
@@ -130,10 +188,22 @@ const Message = () => {
             setMessages(groupedMessages[firstInstructor.instructorId] || []); // Lấy tin nhắn của giảng viên đầu tiên
           }
         }
+        setLoading(false);
       };
       fetchAllMessages();
     }
   }, [instructors, token]);
+
+  useEffect(() => {
+    selectedInstructorRef.current = selectedInstructor;
+  }, [selectedInstructor]);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [message]);
 
   // 📤 Gửi tin nhắn
   const handleSendMessage = async () => {
@@ -279,71 +349,10 @@ const Message = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_BASE_URL}/user/me`,
-          {
-            withCredentials: true,
-          }
-        );
-
-        const userId = res.data?._id;
-        setCurrentUser(res.data);
-
-        if (!userId) return;
-
-        const socket = io(`${process.env.REACT_APP_API_BASE_URL}`, {
-          query: {
-            userId,
-            role: "user", // hoặc 'admin'
-          },
-          withCredentials: true,
-        });
-
-        socketRef.current = socket;
-
-        socket.on("connect", () => {
-          console.log("✅ Socket connected:", socket.id);
-        });
-
-        // 🟢 LẮP VÀO socket listener Ở ĐÂY (bên trong fetchUser)
-        socket.on("receiveMessage", (data) => {
-          const senderId = data.sender?.userId;
-          if (!senderId) return;
-
-          setMessagesByInstructor((prev) => {
-            const updated = { ...prev };
-            if (!updated[senderId]) updated[senderId] = [];
-            updated[senderId] = [...updated[senderId], data];
-            return updated;
-          });
-
-          if (
-            data.sender?.senderRole === "admin" &&
-            selectedInstructorRef.current?.instructorId === data.sender?.userId
-          ) {
-            setMessages((prev) => [...prev, data]);
-            updateMessageStatus(data.sender.userId);
-          }
-          console.log("📩 Received message from socket:", data);
-        });
-      } catch (error) {
-        console.error("❌ Không thể kết nối socket user:", error);
-      }
-    };
-
-    fetchUser();
-
-    return () => {
-      socketRef.current?.disconnect();
-    };
-  }, []);
-
+  if (loading) return <Loading />;
   return (
     <>
-      {instructors.length > 0 ? (
+      {instructors?.length > 0 ? (
         <main className="flex  h-fit overflow-hiden min-h-[calc(100vh-3.0125rem)] max-h-[calc(100vh-532px)] max-md:flex-col bg-none max-md:max-w-full">
           <aside className="bg-black overflow-hidden-scroll flex-row md:order-2 min-w-fit min-h-full px-[1.25rem] py-[2rem] max-md:px-[0.5rem] max-md:py-[0.75rem] max-md:w-full max-xl:ml-0 max-md:pr-0 max-md:min-h-[60px]">
             <div className="flex flex-col text-[1.5rem] font-medium mb-4 text-white max-md:hidden">
