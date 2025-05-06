@@ -47,7 +47,6 @@ function AIChating() {
 
   const handleSendMessage = async (newMessage) => {
     setLoadingPopup(true);
-    console.log("bật");
     if (!globalContext) {
       console.warn("⚠️ Đang tải dữ liệu, vui lòng đợi...");
       return;
@@ -76,12 +75,14 @@ function AIChating() {
         time: new Date().toLocaleTimeString(),
       };
       setMessages((prev) => [...prev, botMessage]);
+      setLoadingPopup(false);
       return;
     }
 
     // Tạo user context
     const formatUserCourse = (courses) => {
       if (!courses || courses.length === 0) return "Chưa đăng ký khóa học nào";
+      setLoadingPopup(false);
       return courses
         .map(
           (course, index) =>
