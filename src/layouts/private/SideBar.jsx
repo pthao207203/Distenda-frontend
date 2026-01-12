@@ -17,6 +17,7 @@ const SideBar = ({ headerHeight }) => {
   const [isDesktop, setIsDesktop] = useState(false); // Xác định xem có phải màn hình lớn hay không
   const location = useLocation(); // Lấy thông tin URL hiện tại
   const menuItems = [
+    { name: "Forum", link: "/forum" },
     { name: "Khóa học của tôi", link: "/courses/CoursePurchased" },
     { name: "Đang học", link: "/courses/CourseStudying" },
     { name: "Đã hoàn thành", link: "/courses/CourseCompleted" },

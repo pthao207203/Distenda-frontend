@@ -30,7 +30,7 @@ function LoginButton({ onSuccess, onFailure }) {
         data-client_id={process.env.REACT_APP_GOOGLE_CLIENT_ID}
         data-context="signin"
         data-ux_mode="popup"
-        data-callback={onSuccess}
+        data-callback="onSuccess"
         data-auto_prompt="false"
       ></div>
       <div id="g_id_signin" className="g_id_signin" />
