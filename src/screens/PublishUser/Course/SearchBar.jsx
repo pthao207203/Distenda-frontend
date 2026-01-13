@@ -1,6 +1,6 @@
 import * as React from "react";
 
-function SearchBar({ onSearch }) {
+function SearchBar({ onSearch, placeholder }) {
   const handleChange = (e) => {
     onSearch(e.target.value);
   };
@@ -21,7 +21,7 @@ function SearchBar({ onSearch }) {
         id="search"
         onChange={handleChange}   // Thêm sự kiện onChange
         className="flex-1 gap-2.5 self-stretch my-auto bg-transparent text-xl max-lg:text-[16px] font-medium text-white text-opacity-80 outline-none"
-        placeholder="Tìm kiếm khóa học"
+        placeholder={placeholder || "Tìm kiếm khóa học"}
       />
     </form>
   );
