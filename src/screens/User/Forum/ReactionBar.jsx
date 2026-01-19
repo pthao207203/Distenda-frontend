@@ -47,6 +47,7 @@ const ReactionBar = ({ myReaction, onReact, reactions }) => {
           <>
             <img
               src={userReaction.png}
+              alt={userReaction.label}
               className="w-10 h-10 max-lg:w-[16px] max-lg:h-[16px]"
             />
             {userReaction.label} 
@@ -83,6 +84,7 @@ const ReactionBar = ({ myReaction, onReact, reactions }) => {
             >
               <img
                 src={r.gif}
+                alt={r.label}
                 className="w-12 h-12 max-lg:w-[24px] max-lg:h-[24px]"
               />
               {/* <span className="text-[10px] text-white opacity-80 w-full text-center">

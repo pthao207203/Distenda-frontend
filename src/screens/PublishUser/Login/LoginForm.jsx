@@ -7,6 +7,20 @@ import FacebookLoginButton from "./FacebookLoginButton.jsx";
 
 import { loginController } from "../../../controllers/auth.controller.js";
 
+const saveUserToLocalStorage = (user) => {
+  if (!user) return;
+
+  localStorage.setItem(
+    "currentUser",
+    JSON.stringify({
+      id: user._id,
+      name: user.UserFullName || "User",
+      email: user.UserEmail,
+      avatar: user.UserAvatar || "",
+    })
+  );
+};
+
 function LoginForm({ setLoading, onForgotPassword }) {
   const [formData, setFormData] = useState({
     UserEmail: "",
@@ -31,7 +45,11 @@ function LoginForm({ setLoading, onForgotPassword }) {
           path: "/", // cookie có hiệu lực toàn site
           sameSite: "Lax", // tăng bảo mật, tránh CSRF
         });
-        navigate("/");
+        const user = res.data.user_info || res.data.data?.user_info;
+        if (user) {
+          saveUserToLocalStorage(user);
+        }
+        navigate("/courses");
       } else {
         setError(res.data.message);
       }
@@ -65,7 +83,11 @@ function LoginForm({ setLoading, onForgotPassword }) {
           path: "/", // cookie có hiệu lực toàn site
           sameSite: "Lax", // tăng bảo mật, tránh CSRF
         });
-        navigate("/");
+        const user = res.data.user_info || res.data.data?.user_info;
+        if (user) {
+          saveUserToLocalStorage(user);
+        }
+        navigate("/courses");
       } else {
         setError(res.data.message);
       }
