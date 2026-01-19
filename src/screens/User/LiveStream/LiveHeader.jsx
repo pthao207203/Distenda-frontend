@@ -4,10 +4,10 @@ const LiveHeader = ({ tab, setTab }) => {
   return (
     <div className="space-y-3">
       {/* Search */}
-       <SearchBar />
+      <SearchBar />
 
       {/* Tabs */}
-      <div className="flex gap-[1rem] text-[1.25rem] font-medium mb-4 mt-4 text-white">
+      <div className="flex gap-[1rem] max-md:text-[16px] md:text-[1.25rem] font-medium mb-4 mt-4 text-white">
         {["LiveNow", "LiveDone"].map((t) => (
           <button
             key={t}

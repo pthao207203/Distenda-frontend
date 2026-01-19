@@ -32,6 +32,7 @@ import MyCoursePurchased from './screens/PublishUser/MyCoursePurchased/CoursePag
 import MyCourseCompleted from './screens/PublishUser/MyCourseCompleted/CoursePage';
 import MyCourseStudying from './screens/PublishUser/MyCourseStudying/CoursePage';
 import Forum from './screens/User/Forum/Forum';
+import LiveStreamDetail from './screens/User/LiveStream/LiveStreamDetail';
 
 
 function App() {
@@ -82,6 +83,7 @@ function App() {
               <Route path='/courses/CourseCompleted' element={<MyCourseCompleted />} />
               <Route path='/courses/CourseStudying' element={<MyCourseStudying />} />
               <Route path='/forum' element={<Forum />} />
+              <Route path='/user/livestream/:LivestreamID' element={<LiveStreamDetail />} />
             </Route>
 
             <Route path='/courses' element={<Courses />} />
