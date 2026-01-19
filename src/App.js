@@ -26,11 +26,13 @@ import UserProfile from './screens/User/ProfileUser/ProfilePage';
 import UserNotification from './screens/User/Notification/NotificationsPage';
 import Message from "./screens/User/Message/Message";
 import AIChating from './screens/User/ChatBoxAI/AIChating';
+import LiveStream from './screens/User/LiveStream/LiveStream';
 import HandlePayment from './screens/User/Payment/HandlePayment';
 import MyCoursePurchased from './screens/PublishUser/MyCoursePurchased/CoursePage';
 import MyCourseCompleted from './screens/PublishUser/MyCourseCompleted/CoursePage';
 import MyCourseStudying from './screens/PublishUser/MyCourseStudying/CoursePage';
 import Forum from './screens/User/Forum/Forum';
+
 
 function App() {
   const updateFavicon = (faviconURL) => {
@@ -73,6 +75,7 @@ function App() {
               <Route path='/user/notification' element={<UserNotification />} />
               <Route path='/user/message' element={<Message />} />
               <Route path='/user/aichating' element={<AIChating />} />
+              <Route path='/user/livestream' element={<LiveStream />} />
               <Route path="/courses/handle-payment" element={<HandlePayment />} />
               <Route path='/courses/CoursePurchased/:CourseSlug' element={<CoursePurchased />} />
               <Route path='/courses/CoursePurchased' element={<MyCoursePurchased />} />
