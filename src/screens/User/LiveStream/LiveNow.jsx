@@ -1,99 +1,419 @@
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import Hls from "hls.js";
+import axios from "axios";
+import { io } from "socket.io-client";
+import { MessageCircle } from "lucide-react";
+import { getLivestreamDetail } from "../../../services/livestream.service";
+import LivestreamReactionBar from "./LivestreamReactionBar";
 import "./LiveStream.css";
 
 const LiveNow = () => {
+  const { LivestreamID } = useParams();
+  const videoRef = useRef(null);
+  const socketRef = useRef(null);
+  const [livestream, setLivestream] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reactions, setReactions] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [viewerCount, setViewerCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  const API_BASE_URL =
+    process.env.REACT_APP_API_BASE_URL || "http://localhost:3001";
+
+  // Reaction types with images like Forum
+  const reactionsList = [
+    {
+      type: "like",
+      label: "Thích",
+      gif: "/Icon/like.gif",
+      png: "/Icon/like.png",
+      color: "#0866ff",
+    },
+    {
+      type: "love",
+      label: "Yêu thích",
+      gif: "/Icon/love.gif",
+      png: "/Icon/love.png",
+      color: "#f91880",
+    },
+    {
+      type: "haha",
+      label: "Haha",
+      gif: "/Icon/haha.gif",
+      png: "/Icon/haha.png",
+      color: "#f7b125",
+    },
+    {
+      type: "wow",
+      label: "Wow",
+      gif: "/Icon/wow.gif",
+      png: "/Icon/wow.png",
+      color: "#f7b125",
+    },
+    {
+      type: "sad",
+      label: "Buồn",
+      gif: "/Icon/sad.gif",
+      png: "/Icon/sad.png",
+      color: "#f7b125",
+    },
+  ];
+
+  // Fetch current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/user/me`, {
+          withCredentials: true,
+        });
+        // Backend trả về trực tiếp user object, không có wrapper
+        if (response.data && response.data._id) {
+          setCurrentUserId(response.data._id);
+        }
+      } catch (err) {
+        console.error("Error fetching current user:", err);
+      }
+    };
+    fetchCurrentUser();
+  }, [API_BASE_URL]);
+
+  const getTotalReactions = () => {
+    return reactions.length;
+  };
+
+  const getUserReactionType = () => {
+    const userReaction = reactions.find((r) => r.userId === currentUserId);
+    return userReaction ? userReaction.type : null;
+  };
+
+  const getRelativeTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 1) return "Vừa mới bắt đầu";
+    if (diffMins < 60) return `${diffMins} phút trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    if (diffDays < 7) return `${diffDays} ngày trước`;
+
+    return date.toLocaleString("vi-VN");
+  };
+
+  const handleAddReaction = async (type) => {
+    if (!currentUserId) {
+      alert("Vui lòng đăng nhập để react");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/livestreams/${LivestreamID}/reaction`,
+        { type },
+        { withCredentials: true }
+      );
+
+      console.log("Add reaction response:", response.data);
+
+      if (response.data.code === 201 || response.data.code === 200) {
+        setReactions(response.data.data);
+        socketRef.current?.emit("addLivestreamReaction", {
+          livestreamId: LivestreamID,
+          type,
+          reactions: response.data.data,
+        });
+      }
+    } catch (err) {
+      console.error("Error adding reaction:", err);
+      alert("Không thể thêm reaction");
+    }
+  };
+
+  const handleRemoveReaction = async () => {
+    if (!currentUserId) return;
+
+    try {
+      const response = await axios.delete(
+        `${API_BASE_URL}/livestreams/${LivestreamID}/reaction`,
+        { withCredentials: true }
+      );
+
+      if (response.data.code === 200) {
+        setReactions(response.data.data);
+        socketRef.current?.emit("removeLivestreamReaction", {
+          livestreamId: LivestreamID,
+          reactions: response.data.data,
+        });
+      }
+    } catch (err) {
+      console.error("Error removing reaction:", err);
+      alert("Không thể xóa reaction");
+    }
+  };
+
+  const handleReaction = async (type) => {
+    if (type === null) {
+      await handleRemoveReaction();
+    } else if (type === getUserReactionType()) {
+      await handleRemoveReaction();
+    } else {
+      await handleAddReaction(type);
+    }
+  };
+
+  useEffect(() => {
+    const fetchLivestream = async () => {
+      try {
+        setLoading(true);
+        const response = await getLivestreamDetail(LivestreamID);
+        if (response.code === 200) {
+          setLivestream(response.data);
+          setReactions(response.data.reactions || []);
+        } else {
+          setError("Không thể tải thông tin livestream");
+        }
+      } catch (err) {
+        setError("Lỗi khi tải livestream: " + err.message);
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (LivestreamID) fetchLivestream();
+  }, [LivestreamID]);
+
+  // Fetch initial viewer count
+  useEffect(() => {
+    if (!LivestreamID) return;
+
+    const fetchData = async () => {
+      try {
+        // Fetch viewer count
+        const viewerResponse = await axios.get(
+          `${API_BASE_URL}/livestreams/${LivestreamID}/active-viewers`,
+          { withCredentials: true }
+        );
+        if (viewerResponse.data?.code === 200) {
+          setViewerCount(viewerResponse.data.data?.activeViewers || 0);
+        }
+
+        // Fetch comment count
+        const commentResponse = await axios.get(
+          `${API_BASE_URL}/livestreams/${LivestreamID}/comments`,
+          {
+            params: { limit: 1, skip: 0 },
+            withCredentials: true,
+          }
+        );
+        if (commentResponse.data?.code === 200) {
+          setCommentCount(commentResponse.data.data?.length || 0);
+        }
+      } catch (err) {
+        console.error("Error fetching viewer count or comments:", err);
+      }
+    };
+
+    fetchData();
+  }, [LivestreamID, API_BASE_URL]);
+
+  // Socket.io connection for livestream reactions
+  useEffect(() => {
+    if (!LivestreamID) return;
+
+    console.log("Connecting Socket.io with livestreamId:", LivestreamID);
+
+    socketRef.current = io(API_BASE_URL, {
+      withCredentials: true,
+    });
+
+    socketRef.current.on("connect", () => {
+      console.log("✅ Socket.io connected");
+      socketRef.current.emit("watchLivestream", LivestreamID);
+      socketRef.current.emit("joinLivestream", LivestreamID);
+      console.log("👁️ Emitted watchLivestream for livestreamId:", LivestreamID);
+    });
+
+    socketRef.current.on("livestreamReactionAdded", (data) => {
+      console.log("Received livestreamReactionAdded:", data);
+      if (data.livestreamId === LivestreamID) {
+        setReactions(data.reactions || []);
+      }
+    });
+
+    socketRef.current.on("livestreamReactionRemoved", (data) => {
+      console.log("Received livestreamReactionRemoved:", data);
+      if (data.livestreamId === LivestreamID) {
+        setReactions(data.reactions || []);
+      }
+    });
+
+    socketRef.current.on("viewerCountUpdated", (data) => {
+      console.log("📊 viewerCountUpdated received:", data);
+      if (data.livestreamId === LivestreamID) {
+        console.log("Setting viewerCount to:", data.viewerCount);
+        setViewerCount(data.viewerCount || 0);
+      }
+    });
+
+    // Lắng nghe bình luận mới
+    socketRef.current.on("commentAdded", (comment) => {
+      console.log("💬 commentAdded received:", comment);
+      setCommentCount((prev) => prev + 1);
+    });
+
+    // Lắng nghe xóa bình luận
+    socketRef.current.on("commentDeleted", (data) => {
+      console.log("🗑️ commentDeleted received:", data);
+      setCommentCount((prev) => Math.max(0, prev - 1));
+    });
+
+    // Cleanup
+    return () => {
+      console.log("Cleaning up Socket.io connection");
+      socketRef.current?.emit("stopWatchingLivestream", LivestreamID);
+      socketRef.current?.emit("leaveLivestream", LivestreamID);
+      socketRef.current?.disconnect();
+    };
+  }, [LivestreamID, API_BASE_URL]);
+
+  useEffect(() => {
+    if (!livestream || !livestream.LivestreamStreamKey) return;
+    const video = videoRef.current;
+    const hlsUrl = `http://localhost:8888/${livestream.LivestreamStreamKey}/index.m3u8`;
+
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        lowLatencyMode: true,
+        liveSyncDuration: 1,
+        liveMaxLatencyDuration: 2,
+        maxLiveSyncPlaybackRate: 1.5,
+        backBufferLength: 0,
+        maxBufferLength: 2,
+        maxBufferHole: 0.1,
+        enableWorker: true,
+      });
+
+      hls.loadSource(hlsUrl);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        setVideoLoaded(true);
+        video.play().catch((error) => {
+          console.warn("Autoplay was prevented:", error);
+        });
+      });
+      hls.on(Hls.Events.LEVEL_UPDATED, (_, data) => {
+        const liveEdge = data.details.liveEdge;
+        if (!isNaN(liveEdge)) video.currentTime = liveEdge - 0.1;
+      });
+      hls.on(Hls.Events.ERROR, (event, data) =>
+        console.error("HLS error", data)
+      );
+
+      return () => hls.destroy();
+    }
+
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = hlsUrl;
+      setVideoLoaded(true);
+      video.play().catch((error) => {
+        console.warn("Autoplay was prevented:", error);
+      });
+    }
+  }, [livestream]);
+
+  if (loading) {
     return (
-        <div className="bg-white bg-opacity-25 overflow-hidden-scroll text-white p-[16px] ">
-            {/* Thumbnail */}
-            <h2 className="font-semibold text-[1.5rem] mb-[8px]">
-                Chuyên viên thiết kế đồ hoạ & web
-            </h2>
-
-            <p className="text-[1.25rem] mb-[8px] ">
-                Noel lạnh quá, hong có ny thì vào đây mà học nèee
-            </p>
-            <div className="relative">
-
-                <span className="absolute top-3 left-3 bg-red-600 px-3 py-1 rounded text-xs font-semibold text-white ">
-                    LIVE
-                </span>
-
-                <img
-                    src="https://i.imgur.com/LmK6Y8n.png"
-                    className="w-full max-h-[35.5rem] object-cover"
-                />
-            </div>
-
-            {/* Info */}
-            <div className=" text-white flex justify-between mt-[8px]">
-                <div className="flex items-center gap-3">
-                    {/* Avatar */}
-                    <img
-                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/bbae0514e8058efa2ff3c88f32951fbd7beba3099187677c6ba1c2f96547ea3f?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
-                        alt="avatar"
-                        className="w-[4rem] h-[4rem] rounded-full object-cover"
-                    />
-
-                    {/* Name + time */}
-                    <div className="flex-1">
-                        <p className="text-[1.25rem] font-semibold mb-1">
-                            Cá biết bay
-                        </p>
-                        <p className="text-[1rem] text-white font-regular">
-                            19:05, 27/12/2025
-                        </p>
-                    </div>
-                </div>
-
-
-                {/* Icons */}
-                <div className="flex items-center gap-6 text-[1.25rem] text-white">
-                    {/* Heart */}
-                    <div className="flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
-                            <mask id="mask0_8112_36199" maskUnits="userSpaceOnUse" x="0" y="0" width="21" height="20">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H20.4725V19.501H0V0Z" fill="white" />
-                            </mask>
-                            <g mask="url(#mask0_8112_36199)">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M1.82347 9.12312C3.22547 13.4851 8.76447 17.0121 10.2365 17.8851C11.7135 17.0031 17.2925 13.4371 18.6495 9.12712C19.5405 6.34112 18.7135 2.81212 15.4275 1.75312C13.8355 1.24212 11.9785 1.55312 10.6965 2.54512C10.4285 2.75112 10.0565 2.75512 9.78647 2.55112C8.42847 1.53012 6.65447 1.23112 5.03747 1.75312C1.75647 2.81112 0.932468 6.34012 1.82347 9.12312M10.2375 19.5011C10.1135 19.5011 9.99047 19.4711 9.87847 19.4101C9.56547 19.2391 2.19247 15.1751 0.395468 9.58112C0.394468 9.58112 0.394468 9.58012 0.394468 9.58012C-0.733532 6.05812 0.522469 1.63212 4.57747 0.325118C6.48147 -0.290882 8.55647 -0.019882 10.2345 1.03912C11.8605 0.0111181 14.0205 -0.272882 15.8865 0.325118C19.9455 1.63412 21.2055 6.05912 20.0785 9.58012C18.3395 15.1101 10.9125 19.2351 10.5975 19.4081C10.4855 19.4701 10.3615 19.5011 10.2375 19.5011" fill="white" />
-                            </g>
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.1537 7.62429C15.7667 7.62429 15.4387 7.32729 15.4067 6.93529C15.3407 6.11329 14.7907 5.41929 14.0077 5.16629C13.6127 5.03829 13.3967 4.61529 13.5237 4.22229C13.6527 3.82829 14.0717 3.61429 14.4677 3.73829C15.8307 4.17929 16.7857 5.38629 16.9027 6.81329C16.9357 7.22629 16.6287 7.58829 16.2157 7.62129C16.1947 7.62329 16.1747 7.62429 16.1537 7.62429" fill="white" />
-                        </svg>
-                        <span>1.7k</span>
-                    </div>
-
-                    {/* Comment */}
-                    <div className="flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
-                            <mask id="mask0_8112_36423" maskUnits="userSpaceOnUse" x="0" y="0" width="22" height="22">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H21.493V21.4938H0V0Z" fill="white" />
-                            </mask>
-                            <g mask="url(#mask0_8112_36423)">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.10844 18.675C5.68844 18.675 6.23544 18.895 6.81444 19.128C10.3614 20.768 14.5564 20.022 17.2894 17.29C20.8954 13.682 20.8954 7.813 17.2894 4.207C15.5434 2.461 13.2214 1.5 10.7494 1.5C8.27644 1.5 5.95344 2.462 4.20844 4.208C1.47444 6.94 0.730437 11.135 2.35544 14.648C2.58944 15.227 2.81544 15.791 2.81544 16.377C2.81544 16.962 2.61444 17.551 2.43744 18.071C2.29144 18.499 2.07044 19.145 2.21244 19.287C2.35144 19.431 3.00144 19.204 3.43044 19.057C3.94544 18.881 4.52944 18.679 5.10844 18.675V18.675ZM10.7244 21.494C9.19644 21.494 7.65844 21.171 6.21944 20.505C5.79544 20.335 5.39844 20.175 5.11344 20.175C4.78544 20.177 4.34444 20.329 3.91844 20.476C3.04444 20.776 1.95644 21.15 1.15144 20.348C0.349437 19.545 0.719437 18.46 1.01744 17.587C1.16444 17.157 1.31544 16.713 1.31544 16.377C1.31544 16.101 1.18244 15.749 0.978437 15.242C-0.894563 11.197 -0.0285628 6.322 3.14844 3.147C5.17644 1.118 7.87544 0 10.7484 0C13.6214 0 16.3214 1.117 18.3494 3.146C22.5414 7.338 22.5414 14.158 18.3494 18.35C16.2944 20.406 13.5274 21.494 10.7244 21.494V21.494Z" fill="white" />
-                            </g>
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M14.6964 12.1621C14.1444 12.1621 13.6924 11.7151 13.6924 11.1621C13.6924 10.6091 14.1354 10.1621 14.6874 10.1621H14.6964C15.2484 10.1621 15.6964 10.6091 15.6964 11.1621C15.6964 11.7151 15.2484 12.1621 14.6964 12.1621" fill="white" />
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M10.6876 12.1621C10.1356 12.1621 9.68359 11.7151 9.68359 11.1621C9.68359 10.6091 10.1256 10.1621 10.6786 10.1621H10.6876C11.2396 10.1621 11.6876 10.6091 11.6876 11.1621C11.6876 11.7151 11.2396 12.1621 10.6876 12.1621" fill="white" />
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M6.67832 12.1621C6.12632 12.1621 5.67432 11.7151 5.67432 11.1621C5.67432 10.6091 6.11732 10.1621 6.66932 10.1621H6.67832C7.23032 10.1621 7.67832 10.6091 7.67832 11.1621C7.67832 11.7151 7.23032 12.1621 6.67832 12.1621" fill="white" />
-                        </svg>
-                        <span>1.7k</span>
-                    </div>
-
-                    {/* View */}
-                    <div className="flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17" fill="none">
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M9.99987 5.64111C8.66987 5.64111 7.58887 6.72311 7.58887 8.05311C7.58887 9.38211 8.66987 10.4631 9.99987 10.4631C11.3299 10.4631 12.4119 9.38211 12.4119 8.05311C12.4119 6.72311 11.3299 5.64111 9.99987 5.64111ZM9.99987 11.9631C7.84287 11.9631 6.08887 10.2091 6.08887 8.05311C6.08887 5.89611 7.84287 4.14111 9.99987 4.14111C12.1569 4.14111 13.9119 5.89611 13.9119 8.05311C13.9119 10.2091 12.1569 11.9631 9.99987 11.9631Z" fill="white" />
-                            <mask id="mask0_8077_683" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="17">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0H19.9998V16.105H0V0Z" fill="white" />
-                            </mask>
-                            <g mask="url(#mask0_8077_683)">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M1.56975 8.05226C3.42975 12.1613 6.56275 14.6043 9.99975 14.6053C13.4368 14.6043 16.5697 12.1613 18.4298 8.05226C16.5697 3.94426 13.4368 1.50126 9.99975 1.50026C6.56375 1.50126 3.42975 3.94426 1.56975 8.05226ZM10.0017 16.1053H9.99775H9.99675C5.86075 16.1023 2.14675 13.2033 0.06075 8.34826C-0.02025 8.15926 -0.02025 7.94526 0.06075 7.75626C2.14675 2.90226 5.86175 0.00326172 9.99675 0.000261719C9.99875 -0.000738281 9.99875 -0.000738281 9.99975 0.000261719C10.0017 -0.000738281 10.0017 -0.000738281 10.0028 0.000261719C14.1388 0.00326172 17.8527 2.90226 19.9387 7.75626C20.0208 7.94526 20.0208 8.15926 19.9387 8.34826C17.8537 13.2033 14.1388 16.1023 10.0028 16.1053H10.0017Z" fill="white" />
-                            </g>
-                        </svg>
-                        <span>1.7k</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="text-center text-white p-4">Đang tải livestream...</div>
     );
+  }
+
+  if (error || !livestream) {
+    return (
+      <div className="text-center text-red-400 p-4">
+        {error || "Không tìm thấy livestream"}
+      </div>
+    );
+  }
+
+  const avatar =
+    livestream.createdBy?.UserId?.AdminAvatar ||
+    "https://distenda.vn/default-avatar.jpg";
+
+  return (
+    <div className="bg-white bg-opacity-25 overflow-hidden-scroll text-white p-[16px] ">
+      <h2 className="font-semibold max-md:text-[18px] md:text-[1.5rem] mb-[8px]">
+        {livestream.LivestreamTitle}
+      </h2>
+
+      <p className="max-md:text-[16px] md:text-[1.25rem] mb-[8px] ">
+        {livestream.LivestreamDescription || ""}
+      </p>
+      <div className={`relative ${!videoLoaded ? "min-h-[300px]" : ""}`}>
+        <span className="absolute top-3 left-3 bg-red-600 px-3 py-1 rounded text-xs font-semibold text-white ">
+          LIVE
+        </span>
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          controls
+          className="w-full max-h-[35.5rem] object-cover bg-black"
+        />
+      </div>
+
+      <div className=" text-white flex justify-between mt-[8px]">
+        <div className="flex items-center gap-3">
+          <img
+            src={avatar}
+            alt="avatar"
+            className="w-[4rem] h-[4rem] rounded-full object-cover"
+          />
+
+          <div className="flex-1">
+            <p className="max-md:text-[16px] md:text-[1.25rem] font-semibold mb-1">
+              {livestream.createdBy?.UserId?.AdminFullName || ""}
+            </p>
+            <p className="max-md:text-[14px] md:text-[1rem] text-white font-regular">
+              {getRelativeTime(livestream.LivestreamStartedAt)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6 max-md:text-[16px] md:text-[1.25rem] text-white">
+          {/* Reaction bar */}
+          <LivestreamReactionBar
+            myReaction={getUserReactionType()}
+            totalReactions={getTotalReactions()}
+            onReact={handleReaction}
+            reactions={reactionsList}
+          />
+
+          <div className="flex items-center gap-1">
+            <MessageCircle size={20} />
+            <span>{commentCount}</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/6d0691d3e7343fc6c0028f1faa5c59306b98586db03c35bcda1991ff364f4d53?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e"
+              alt="eye icon"
+              className="w-8 h-8 object-contain"
+            />
+            <span>{viewerCount}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default LiveNow;
