@@ -23,6 +23,7 @@ const SideBar = ({ headerHeight }) => {
     { name: "Đã hoàn thành", link: "/courses/CourseCompleted" },
     { name: "Chatbox AI", link: "/user/aichating" },
     { name: "Tin nhắn", link: "/user/message" },
+    { name: "Livestream", link: "/user/livestream" },
   ];
 
   // Kiểm tra kích thước màn hình
