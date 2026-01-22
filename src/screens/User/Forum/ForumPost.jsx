@@ -1,8 +1,8 @@
 // src/components/ForumPost.jsx
 import React from "react";
-import { MessageCircle, Share2, FileText, Download } from "lucide-react";
+import { MessageCircle, Share2, FileText, Download, Edit2, SquarePen } from "lucide-react";
 import ReactionBar from "./ReactionBar";
-
+import { getCurrentUser} from "../../../utils/getUser";
 const formatDate = (date) => {
   if (!date) return "";
 
@@ -10,7 +10,7 @@ const formatDate = (date) => {
   const postDate = new Date(date);
   const diffInSeconds = Math.floor((now - postDate) / 1000);
 
-  if (diffInSeconds < 60) return "vừa xong";
+  if (diffInSeconds < 60) return "Vừa xong";
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
@@ -30,13 +30,16 @@ const ForumPost = ({
   onCommentClick,
   onReact,
   reactions,
+  onEdit,
   variant = "list",
 }) => {
+    const normalizeText = (v) =>
+  typeof v === "string" && v !== "undefined" ? v : "";
   const postId = post._id || post.id;
-  const postTitle = post.Title || post.title || "";
-  const postContent = post.Content || "";
-  const postImages = post.Images || post.images || [];           // ← mảng nhiều ảnh
-  const postFiles = post.Files || post.files || [];               // ← mảng file đính kèm
+const postTitle = normalizeText(post.Title || post.title);
+const postContent = normalizeText(post.Content);
+  const postImages = post.Images || post.images || [];           // mảng nhiều ảnh
+  const postFiles = post.Files || post.files || [];               // mảng file đính kèm
   const postAuthor = post.Author || {};
   const authorName = postAuthor.name || "Ẩn danh";
   const authorAvatar = postAuthor.avatar || "https://i.pravatar.cc/150?img=68";
@@ -56,6 +59,9 @@ const ForumPost = ({
   }
 
   const isModal = variant === "modal";
+  const currentUser = getCurrentUser();
+  const isOwner = currentUser && postAuthor._id === currentUser.id; 
+
 
   return (
     <article
@@ -63,6 +69,18 @@ const ForumPost = ({
         isModal ? "rounded-t-2xl" : ""
       }`}
     >
+      <div className="flex justify-end px-4">
+               {/* Chỉ hiển thị nút Sửa nếu là chủ bài viết */}
+          {isOwner && (
+            <button
+              onClick={() => onEdit(post)}
+              className="text-white/80 hover:text-white flex items-center gap-1 mt-2 text-[1.125rem] max-lg:text-[13px]"
+            >
+              <SquarePen size={16} />
+              Sửa
+            </button>
+          )}
+          </div>
       {/* Header */}
       <div className="p-4 pb-2 flex justify-between">
         <div className="flex gap-3 text-white">

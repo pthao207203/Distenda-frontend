@@ -6,7 +6,7 @@ export const getNewestPostsService = async () => {
       {
         method: "GET",
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -28,7 +28,7 @@ export const getDetailPostService = async (PostID) => {
       {
         method: "GET",
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -43,22 +43,25 @@ export const getDetailPostService = async (PostID) => {
 };
 
 // [GET] /forum/my-posts
-export const getMyPostsService = async () => {
+export const getMyPostsService = async (params = {}) => {
   try {
+    const query = new URLSearchParams(params).toString();
+
     const response = await fetch(
-      `${process.env.REACT_APP_API_BASE_URL}/forum/my-posts`,
+      `${process.env.REACT_APP_API_BASE_URL}/forum/my-posts${
+        query ? `?${query}` : ""
+      }`,
       {
         method: "GET",
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {
       throw new Error("Lấy bài viết của tôi thất bại");
     }
 
-    const responseData = await response.json();
-    return responseData;
+    return await response.json();
   } catch (error) {
     throw error.message;
   }
@@ -70,48 +73,53 @@ export const createPostService = async (formData) => {
       `${process.env.REACT_APP_API_BASE_URL}/forum/create`,
       {
         method: "POST",
-        body: formData,                  
-        credentials: "include",            
-      }
+        body: formData,
+        credentials: "include",
+      },
     );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Tạo bài viết thất bại (${response.status})`);
+      throw new Error(
+        errorData.message || `Tạo bài viết thất bại (${response.status})`,
+      );
     }
 
     const responseData = await response.json();
     return responseData;
   } catch (error) {
     console.error("Lỗi khi gọi API tạo bài viết:", error);
-    throw error; 
+    throw error;
   }
 };
 
 // [PUT] /forum/:PostID/edit
 export const updatePostService = async (PostID, data) => {
-  try {
-    const response = await fetch(
-      `${process.env.REACT_APP_API_BASE_URL}/forum/${PostID}/edit`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        credentials: "include",
-      }
-    );
+  const formData = new FormData();
 
-    if (!response.ok) {
-      throw new Error("Cập nhật bài viết thất bại");
-    }
+  formData.append("Title", data.Title);
+  formData.append("Content", data.Content);
 
-    const responseData = await response.json();
-    return responseData;
-  } catch (error) {
-    throw error.message;
-  }
+  data.ExistingImages?.forEach((img) => formData.append("ExistingImages", img));
+
+  data.ExistingFiles?.forEach((file) => formData.append("ExistingFiles", file));
+
+  data.Images?.forEach((img) => formData.append("Images", img));
+
+  data.Files?.forEach((file) => formData.append("Files", file));
+
+  const response = await fetch(
+    `${process.env.REACT_APP_API_BASE_URL}/forum/${PostID}/edit`,
+    {
+      method: "PUT",
+      body: formData,
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) throw new Error("Cập nhật bài viết thất bại");
+
+  return response.json();
 };
 
 // [DELETE] /forum/:PostID/delete
@@ -122,7 +130,7 @@ export const deletePostService = async (PostID) => {
       {
         method: "DELETE",
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -148,7 +156,7 @@ export const reactToPostService = async (PostID, type) => {
         },
         body: JSON.stringify({ type }),
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -174,7 +182,7 @@ export const addCommentService = async (PostID, content) => {
         },
         body: JSON.stringify({ Content: content }),
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -200,7 +208,7 @@ export const addReplyService = async (PostID, CommentID, content) => {
         },
         body: JSON.stringify({ Content: content }),
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {

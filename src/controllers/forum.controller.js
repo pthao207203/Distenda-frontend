@@ -14,7 +14,7 @@ import {
 export const getNewestPostsController = async (
   setSuccess,
   setError,
-  setLoading
+  setLoading,
 ) => {
   try {
     setLoading(true);
@@ -36,7 +36,7 @@ export const getDetailPostController = async (
   PostID,
   setSuccess,
   setError,
-  setLoading
+  setLoading,
 ) => {
   try {
     setLoading(true);
@@ -57,11 +57,13 @@ export const getDetailPostController = async (
 export const getMyPostsController = async (
   setSuccess,
   setError,
-  setLoading
+  setLoading,
+  status = null,
 ) => {
   try {
     setLoading(true);
-    const result = await getMyPostsService();
+    const params = status ? { status } : {};
+    const result = await getMyPostsService(params);
     if (result.success) {
       setSuccess(result.data);
     } else {
@@ -96,17 +98,13 @@ export const updatePostController = async (
   data,
   setSuccess,
   setError,
-  navigate
 ) => {
   try {
     const result = await updatePostService(PostID, data);
     if (result.success) {
       setSuccess("Cập nhật bài viết thành công!");
-      setTimeout(() => {
-        navigate(`/forum/${result.data.PostSlug}`);
-      }, 2000);
     } else {
-      setError(result.message || "Lỗi không xác định");
+      setError(result.message || "Lỗi cập nhật bài viết");
     }
   } catch (err) {
     setError(err);
@@ -118,15 +116,11 @@ export const deletePostController = async (
   PostID,
   setSuccess,
   setError,
-  navigate
 ) => {
   try {
     const result = await deletePostService(PostID);
     if (result.success) {
       setSuccess("Xóa bài viết thành công!");
-      setTimeout(() => {
-        navigate("/forum");
-      }, 2000);
     } else {
       setError(result.message || "Lỗi không xác định");
     }
@@ -140,7 +134,7 @@ export const reactToPostController = async (
   PostID,
   type,
   setSuccess,
-  setError
+  setError,
 ) => {
   try {
     const result = await reactToPostService(PostID, type);
@@ -159,7 +153,7 @@ export const addCommentController = async (
   PostID,
   content,
   setSuccess,
-  setError
+  setError,
 ) => {
   try {
     const result = await addCommentService(PostID, content);
@@ -179,7 +173,7 @@ export const addReplyController = async (
   CommentID,
   content,
   setSuccess,
-  setError
+  setError,
 ) => {
   try {
     const result = await addReplyService(PostID, CommentID, content);
