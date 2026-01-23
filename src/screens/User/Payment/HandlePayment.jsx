@@ -24,14 +24,14 @@ export default function HandlePayment() {
           { withCredentials: true }
         )
         .then((res) => {
-          setPopupContent("✅ Thanh toán thành công! Khóa học đã được kích hoạt.");
+          setPopupContent("Thanh toán thành công! Khóa học đã được kích hoạt.");
         })
         .catch((err) => {
-          setPopupContent(err?.response?.data?.message || "❌ Lỗi xác nhận thanh toán.");
+          setPopupContent(err?.response?.data?.message || "Lỗi xác nhận thanh toán.");
         })
         .finally(() => setShowPopup(true));
     } else {
-      setPopupContent("❌ Thanh toán thất bại hoặc bị hủy!");
+      setPopupContent("Thanh toán thất bại hoặc bị hủy!");
       setShowPopup(true);
     }
   }, []);
