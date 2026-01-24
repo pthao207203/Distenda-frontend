@@ -1,8 +1,16 @@
 // src/components/ForumPost.jsx
 import React from "react";
-import { MessageCircle, Share2, FileText, Download, Edit2, SquarePen } from "lucide-react";
+import {
+  MessageCircle,
+  Share2,
+  FileText,
+  Download,
+  Edit2,
+  SquarePen,
+  Trash2,
+} from "lucide-react";
 import ReactionBar from "./ReactionBar";
-import { getCurrentUser} from "../../../utils/getUser";
+import { getCurrentUser } from "../../../utils/getUser";
 const formatDate = (date) => {
   if (!date) return "";
 
@@ -11,11 +19,16 @@ const formatDate = (date) => {
   const diffInSeconds = Math.floor((now - postDate) / 1000);
 
   if (diffInSeconds < 60) return "Vừa xong";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} tuần trước`;
-  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} tháng trước`;
+  if (diffInSeconds < 3600)
+    return `${Math.floor(diffInSeconds / 60)} phút trước`;
+  if (diffInSeconds < 86400)
+    return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+  if (diffInSeconds < 604800)
+    return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
+  if (diffInSeconds < 2592000)
+    return `${Math.floor(diffInSeconds / 604800)} tuần trước`;
+  if (diffInSeconds < 31536000)
+    return `${Math.floor(diffInSeconds / 2592000)} tháng trước`;
 
   return postDate.toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -31,15 +44,16 @@ const ForumPost = ({
   onReact,
   reactions,
   onEdit,
+  onDelete,
   variant = "list",
 }) => {
-    const normalizeText = (v) =>
-  typeof v === "string" && v !== "undefined" ? v : "";
+  const normalizeText = (v) =>
+    typeof v === "string" && v !== "undefined" ? v : "";
   const postId = post._id || post.id;
-const postTitle = normalizeText(post.Title || post.title);
-const postContent = normalizeText(post.Content);
-  const postImages = post.Images || post.images || [];           // mảng nhiều ảnh
-  const postFiles = post.Files || post.files || [];               // mảng file đính kèm
+  const postTitle = normalizeText(post.Title || post.title);
+  const postContent = normalizeText(post.Content);
+  const postImages = post.Images || post.images || []; // mảng nhiều ảnh
+  const postFiles = post.Files || post.files || []; // mảng file đính kèm
   const postAuthor = post.Author || {};
   const authorName = postAuthor.name || "Ẩn danh";
   const authorAvatar = postAuthor.avatar || "https://i.pravatar.cc/150?img=68";
@@ -60,8 +74,7 @@ const postContent = normalizeText(post.Content);
 
   const isModal = variant === "modal";
   const currentUser = getCurrentUser();
-  const isOwner = currentUser && postAuthor._id === currentUser.id; 
-
+  const isOwner = currentUser && postAuthor._id === currentUser.id;
 
   return (
     <article
@@ -69,18 +82,27 @@ const postContent = normalizeText(post.Content);
         isModal ? "rounded-t-2xl" : ""
       }`}
     >
-      <div className="flex justify-end px-4">
-               {/* Chỉ hiển thị nút Sửa nếu là chủ bài viết */}
-          {isOwner && (
+      <div className="flex justify-end px-4 gap-2">
+        {/* Chỉ hiển thị nút Sửa và Xóa nếu là chủ bài viết */}
+        {isOwner && (
+          <>
             <button
               onClick={() => onEdit(post)}
-              className="text-white/80 hover:text-white flex items-center gap-1 mt-2 text-[1.125rem] max-lg:text-[13px]"
+              className="text-white/80 hover:text-white flex items-center gap-1 mt-2 text-[1.125rem] max-lg:text-[13px] transition-colors"
             >
               <SquarePen size={16} />
               Sửa
             </button>
-          )}
-          </div>
+            <button
+              onClick={() => onDelete(post)}
+              className="text-white/80 hover:text-red-400 flex items-center gap-1 mt-2 text-[1.125rem] max-lg:text-[13px] transition-colors"
+            >
+              <Trash2 size={16} />
+              Xóa
+            </button>
+          </>
+        )}
+      </div>
       {/* Header */}
       <div className="p-4 pb-2 flex justify-between">
         <div className="flex gap-3 text-white">
@@ -123,8 +145,8 @@ const postContent = normalizeText(post.Content);
               postImages.length === 1
                 ? "grid-cols-1"
                 : postImages.length <= 4
-                ? "grid-cols-2"
-                : "grid-cols-2 sm:grid-cols-3"
+                  ? "grid-cols-2"
+                  : "grid-cols-2 sm:grid-cols-3"
             }`}
           >
             {postImages.map((img, index) => (
@@ -134,9 +156,9 @@ const postContent = normalizeText(post.Content);
                 onClick={!isModal ? onClick : undefined}
               >
                 <img
-                  src={img.url || img} 
+                  src={img.url || img}
                   alt={`Post image ${index + 1}`}
-                  className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                  className="w-full h-full object-contain hover:opacity-90 transition-opacity"
                   onError={(e) => (e.target.style.display = "none")}
                 />
                 {postImages.length > 4 && index === 3 && (
@@ -173,7 +195,9 @@ const postContent = normalizeText(post.Content);
                       {file.name || `File ${index + 1}`}
                     </p>
                     <p className="text-gray-400 text-sm">
-                      {file.size ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : ""}
+                      {file.size
+                        ? `${(file.size / 1024 / 1024).toFixed(1)} MB`
+                        : ""}
                     </p>
                   </div>
                   <Download
@@ -208,7 +232,9 @@ const postContent = normalizeText(post.Content);
                 />
               ))}
           </div>
-          {totalReactions > 0 && <span className="text-white/80">{totalReactions}</span>}
+          {totalReactions > 0 && (
+            <span className="text-white/80">{totalReactions}</span>
+          )}
         </div>
         <span>{commentsCount} bình luận</span>
       </div>

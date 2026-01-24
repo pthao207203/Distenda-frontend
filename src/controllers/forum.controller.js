@@ -95,19 +95,20 @@ export const createPostController = async (formData, onSuccess, onError) => {
 // [PUT] /forum/:PostID/edit
 export const updatePostController = async (
   PostID,
-  data,
-  setSuccess,
-  setError,
+  formData,
+  onSuccess,
+  onError
 ) => {
   try {
-    const result = await updatePostService(PostID, data);
+    const result = await updatePostService(PostID, formData);
+
     if (result.success) {
-      setSuccess("Cập nhật bài viết thành công!");
+      onSuccess(result.data);
     } else {
-      setError(result.message || "Lỗi cập nhật bài viết");
+      onError(result.message || "Lỗi cập nhật bài viết");
     }
   } catch (err) {
-    setError(err);
+    onError(err.message || "Lỗi cập nhật bài viết");
   }
 };
 

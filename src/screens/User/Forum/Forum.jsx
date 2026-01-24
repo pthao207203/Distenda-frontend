@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, getUserAvatar } from "../../../utils/getUser";
-
+import { useSearchParams } from "react-router-dom";
 import {
   getNewestPostsController,
   getDetailPostController,
@@ -67,28 +67,62 @@ const reactions = [
   },
 ];
 
+const cornerImages = [
+  {
+    src: "https://cdn.builder.io/api/v1/image/assets/TEMP/59b9819b2f8bcba5a532bac25a2a11282419b6aabd38e3a3bd70b97c7bbec430?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
+    alt: "Top left decorative element",
+    className: "absolute top-0 left-0",
+  },
+  {
+    src: "https://cdn.builder.io/api/v1/image/assets/TEMP/631194690e0d3936d5085113c8d86eb3414e79c243145ce47d95df9316e6e37e?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
+    alt: "Top right decorative element",
+    className: "absolute top-0 right-0",
+  },
+  {
+    src: "https://cdn.builder.io/api/v1/image/assets/TEMP/29ca412ec35dc720602a949c8cfc32eb796543795e2d5aa33c030019556c26ae?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
+    alt: "Bottom left decorative element",
+    className: "absolute bottom-0 left-0",
+  },
+  {
+    src: "https://cdn.builder.io/api/v1/image/assets/TEMP/37fc4790a46aa078c69f7f7e2592a3795899a59503c0ea27bb49607794680bdf?placeholderIfAbsent=true&apiKey=e677dfd035d54dfb9bce1976069f6b0e",
+    alt: "Bottom right decorative element",
+    className: "absolute bottom-0 right-0",
+  },
+];
+
 const Forum = () => {
   const [posts, setPosts] = useState([]);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [commentInputs, setCommentInputs] = useState({});
   const [replyInputs, setReplyInputs] = useState({});
-  const [activeTab, setActiveTab] = useState("newest");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
-  const [previewImages, setPreviewImages] = useState([]);
+  // Ảnh
+  const [existingImages, setExistingImages] = useState([]); // URL cloudinary
+  const [previewImages, setPreviewImages] = useState([]); // dùng render
+  const [imageFiles, setImageFiles] = useState([]); // File mới
+  // File
+  const [existingFiles, setExistingFiles] = useState([]);
   const [previewFiles, setPreviewFiles] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
   const [attachedFiles, setAttachedFiles] = useState([]);
+
   const [loadingCreate, setLoadingCreate] = useState(false);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "newest";
   // Thêm state cho modal edit
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPost, setEditingPost] = useState(null); // Post đang edit
 
-  // Thêm state cho filter status ở tab your-posts
-  const [statusFilter, setStatusFilter] = useState("all"); // all, approved, pending, rejected
+  // Thêm state cho confirmation delete
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
+
+  // Thêm state cho filter status ở tab my-posts
+  const statusFilter = searchParams.get("status") || "all"; // all, approved, pending, rejected
   const selectedPost = posts.find(
     (p) => p.id === selectedPostId || p._id === selectedPostId,
   );
@@ -113,7 +147,7 @@ const Forum = () => {
           },
           setLoading,
         );
-      } else if (activeTab === "your-posts") {
+      } else if (activeTab === "my-posts") {
         await getMyPostsController(
           (data) => {
             const normalized = Array.isArray(data) ? data : [];
@@ -164,7 +198,7 @@ const Forum = () => {
 
   // Ngăn scroll
   useEffect(() => {
-    if (selectedPost || showCreateModal || showEditModal) {
+    if (selectedPost || showCreateModal || showEditModal || showDeleteConfirm) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -172,7 +206,7 @@ const Forum = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [selectedPost, showCreateModal, showEditModal]);
+  }, [selectedPost, showCreateModal, showEditModal, showDeleteConfirm]);
 
   // Xử lý upload ảnh (nhiều ảnh)
   const handleImageUpload = (e) => {
@@ -211,13 +245,27 @@ const Forum = () => {
   // Xóa ảnh
   const removeImage = (index) => {
     setPreviewImages((prev) => prev.filter((_, i) => i !== index));
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+
+    if (index < existingImages.length) {
+      // xóa ảnh cũ
+      setExistingImages((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      // xóa ảnh mới
+      const newIndex = index - existingImages.length;
+      setImageFiles((prev) => prev.filter((_, i) => i !== newIndex));
+    }
   };
 
   // Xóa file
   const removeFile = (index) => {
-    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviewFiles((prev) => prev.filter((_, i) => i !== index)); // Thêm dòng này
+    setPreviewFiles((prev) => prev.filter((_, i) => i !== index));
+
+    if (index < existingFiles.length) {
+      setExistingFiles((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      const newIndex = index - existingFiles.length;
+      setAttachedFiles((prev) => prev.filter((_, i) => i !== newIndex));
+    }
   };
   // Gửi bài viết mới
   const handleCreatePost = async () => {
@@ -260,6 +308,10 @@ const Forum = () => {
           setPreviewFiles([]);
           fetchPosts();
           alert("Đăng bài thành công!");
+          setSearchParams({
+            tab: "my-posts",
+            status: "pending",
+          });
         },
         (err) => alert(err || "Không thể tạo bài viết"),
       );
@@ -271,173 +323,191 @@ const Forum = () => {
     }
   };
 
-  const normalizeText = (v) => {
-  if (v === undefined || v === null) return "";
-  if (typeof v === "string" && v.trim() === "undefined") return "";
-  return v;
-};
+  const handleEditPost = async () => {
+    if (!editingPost) return;
 
-  // Xử lý edit post
-const handleEditPost = async () => {
-  if (!editingPost) return;
+    /* ===== 1. CHUẨN HÓA TITLE / CONTENT ===== */
+    const finalTitle = newPostTitle.trim() || editingPost.Title || "";
+    const finalContent = newPostContent.trim() || editingPost.Content || "";
 
-  // ===== BƯỚC 1: Chuẩn hóa dữ liệu =====
-  const finalTitle = newPostTitle.trim() || editingPost.Title || "";
-  const finalContent = newPostContent.trim() || editingPost.Content || "";
-
-  // Phải có ít nhất title hoặc content
-  if (!finalTitle && !finalContent) {
-    alert("Tiêu đề hoặc nội dung không được để trống!");
-    return;
-  }
-
-  setLoadingCreate(true);
-
-  try {
-    // ===== BƯỚC 2: Build FormData =====
-    const formData = new FormData();
-
-    // ✅ LUÔN GỬI title và content (không skip dù không sửa)
-    formData.append("Title", finalTitle);
-    formData.append("Content", finalContent);
-
-    // ===== GỬI ảnh cũ (dạng URL string) =====
-    previewImages.forEach((url) => {
-      if (typeof url === "string" && url.trim()) {
-        formData.append("ExistingImages", url);
-      }
-    });
-
-    // ===== GỬI ảnh mới (dạng File object) =====
-    imageFiles.forEach((file) => {
-      if (file instanceof File) {
-        formData.append("Images", file);
-      }
-    });
-
-    // ===== GỬI file cũ (dạng URL string) =====
-    previewFiles.forEach((url) => {
-      if (typeof url === "string" && url.trim()) {
-        formData.append("ExistingFiles", url);
-      }
-    });
-
-    // ===== GỬI file mới (dạng File object) =====
-    attachedFiles.forEach((file) => {
-      if (file instanceof File) {
-        formData.append("Files", file);
-      }
-    });
-
-    console.log("=== FormData Gửi ===");
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}: File - ${value.name}`);
-      } else {
-        console.log(`${key}: ${value}`);
-      }
+    if (!finalTitle && !finalContent) {
+      alert("Tiêu đề hoặc nội dung không được để trống!");
+      return;
     }
 
-    // ===== BƯỚC 3: Gọi API update =====
-    await updatePostController(
-      editingPost._id,
-      formData,
-      (response) => {
-        console.log("=== Response từ updatePostController ===", response);
+    setLoadingCreate(true);
 
-        // ✅ FIX: Response có thể là object hoặc có data field
-        const updatedPost = response?.data || response;
+    try {
+      /* ===== 2. BUILD FORMDATA ===== */
+      const formData = new FormData();
 
-        if (updatedPost && updatedPost._id) {
-          // Cập nhật list posts
-          setPosts((prev) =>
-            prev.map((p) =>
-              p._id === editingPost._id ? updatedPost : p
-            ),
-          );
+      // Luôn gửi title & content
+      formData.append("Title", finalTitle);
+      formData.append("Content", finalContent);
 
-          // Optional: reload detail để chắc chắn có dữ liệu mới nhất
-          getDetailPostController(
-            editingPost._id,
-            (detailedPost) => {
-              console.log("=== Detailed Post sau reload ===", detailedPost);
-              setPosts((prev) =>
-                prev.map((p) =>
-                  p._id === editingPost._id ? detailedPost : p
-                ),
-              );
-            },
-            (err) => {
-              console.error("Error reload detail:", err);
-            },
-            () => {},
-          );
+      /* ===== 3. ẢNH CŨ – CHỈ URL CLOUDINARY ===== */
+      formData.append("ExistingImages", JSON.stringify(existingImages || []));
+
+      /* ===== 4. ẢNH MỚI – FILE OBJECT ===== */
+      imageFiles.forEach((file) => {
+        if (file instanceof File) {
+          formData.append("Images", file);
         }
+      });
 
-        // Reset form
-        setShowEditModal(false);
-        setEditingPost(null);
-        setNewPostTitle("");
-        setNewPostContent("");
-        setImageFiles([]);
-        setPreviewImages([]);
-        setAttachedFiles([]);
-        setPreviewFiles([]);
+      /* ===== 5. FILE CŨ ===== */
+      formData.append("ExistingFiles", JSON.stringify(existingFiles || []));
 
-        alert("Cập nhật bài viết thành công!");
-      },
-      (err) => {
-        console.error("=== Error updatePost ===", err);
-        alert(err || "Lỗi cập nhật bài viết");
-      },
-    );
-  } catch (error) {
-    console.error("=== Catch Error ===", error);
-    alert("Có lỗi xảy ra khi cập nhật");
-  } finally {
-    setLoadingCreate(false);
-  }
-};
+      /* ===== 6. FILE MỚI ===== */
+      attachedFiles.forEach((file) => {
+        if (file instanceof File) {
+          formData.append("Files", file);
+        }
+      });
+
+      /* ===== DEBUG ===== */
+      console.log("=== FormData EDIT POST ===");
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}: File - ${value.name}`);
+        } else {
+          console.log(`${key}: ${value}`);
+        }
+      }
+
+      /* ===== 7. CALL API ===== */
+      await updatePostController(
+        editingPost._id,
+        formData,
+        (response) => {
+          const updatedPost = response?.data || response;
+
+          if (updatedPost?._id) {
+            // Update list
+            setPosts((prev) =>
+              prev.map((p) => (p._id === editingPost._id ? updatedPost : p)),
+            );
+          }
+
+          /* ===== RESET STATE ===== */
+          setShowEditModal(false);
+          setEditingPost(null);
+          setNewPostTitle("");
+          setNewPostContent("");
+          setExistingImages([]);
+          setExistingFiles([]);
+          setPreviewImages([]);
+          setPreviewFiles([]);
+          setImageFiles([]);
+          setAttachedFiles([]);
+
+          alert("Cập nhật bài viết thành công!");
+        },
+        (err) => {
+          console.error("Update error:", err);
+          alert(err || "Lỗi cập nhật bài viết");
+        },
+      );
+    } catch (error) {
+      console.error("Catch error:", error);
+      alert("Có lỗi xảy ra khi cập nhật");
+    } finally {
+      setLoadingCreate(false);
+    }
+  };
+
   // Khi mở edit, preload data
- const openEditModal = (post) => {
-  console.log("=== Opening edit modal for post ===", post);
-  
-  setEditingPost(post);
+  const openEditModal = (post) => {
+    if (!post) return;
 
-  // ===== Lấy Title & Content =====
-  const title = post.Title || "";
-  const content = post.Content || "";
+    console.log("=== Opening edit modal ===", post);
 
-  setNewPostTitle(title);
-  setNewPostContent(content);
+    setEditingPost(post);
 
-  // ===== Lấy ảnh cũ: có thể là string URL hoặc object {url: "..."} =====
-  const oldImages = (post.Images || [])
-    .map((img) => {
-      if (typeof img === "string") return img;
-      if (typeof img === "object" && img?.url) return img.url;
-      return null;
-    })
-    .filter(Boolean);
-  
-  setPreviewImages(oldImages);
+    /* ===== 1. TITLE & CONTENT ===== */
+    setNewPostTitle(post.Title || "");
+    setNewPostContent(post.Content || "");
 
-  // ===== Lấy file cũ: có thể là string URL hoặc object {url: "..."} =====
-  const oldFiles = (post.Files || [])
-    .map((f) => {
-      if (typeof f === "string") return f;
-      if (typeof f === "object" && f?.url) return f.url;
-      return null;
-    })
-    .filter(Boolean);
-  
-  setPreviewFiles(oldFiles);
+    /* ===== 2. ẢNH CŨ (CHỈ URL THẬT) ===== */
+    const oldImages = (post.Images || [])
+      .map((img) => {
+        if (typeof img === "string" && img.startsWith("http")) return img;
+        if (typeof img === "object" && img?.url?.startsWith("http"))
+          return img.url;
+        return null;
+      })
+      .filter(Boolean);
 
-  // ===== Reset file mới =====
-  setImageFiles([]);
-  setAttachedFiles([]);
-  setShowEditModal(true);
-};
+    setExistingImages(oldImages); // dùng để gửi lên BE
+    setPreviewImages(oldImages); // dùng để hiển thị
+
+    /* ===== 3. FILE CŨ ===== */
+    const oldFiles = (post.Files || [])
+      .map((f) => {
+        if (typeof f === "string" && f.startsWith("http")) {
+          return { url: f, name: decodeURIComponent(f.split("/").pop()) };
+        }
+        if (typeof f === "object" && f?.url?.startsWith("http")) {
+          return {
+            url: f.url,
+            name: f.name || decodeURIComponent(f.url.split("/").pop()),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    setExistingFiles(oldFiles); // gửi BE
+    setPreviewFiles(oldFiles); // hiển thị
+
+    /* ===== 4. RESET FILE MỚI ===== */
+    setImageFiles([]);
+    setAttachedFiles([]);
+
+    /* ===== 5. OPEN MODAL ===== */
+    setShowEditModal(true);
+  };
+
+  // Mở modal xác nhận xóa
+  const openDeleteConfirm = (post) => {
+    setPostToDelete(post);
+    setShowDeleteConfirm(true);
+  };
+
+  // Xóa bài viết
+  const handleDeletePost = async () => {
+    if (!postToDelete) return;
+
+    setLoadingCreate(true);
+    try {
+      await deletePostController(
+        postToDelete._id,
+        () => {
+          // Xóa khỏi danh sách posts
+          setPosts((prev) => prev.filter((p) => p._id !== postToDelete._id));
+
+          // Đóng detail modal nếu đang xem bài viết bị xóa
+          if (selectedPostId === postToDelete._id) {
+            setSelectedPostId(null);
+          }
+
+          // Đóng confirm modal
+          setShowDeleteConfirm(false);
+          setPostToDelete(null);
+
+          alert("Xóa bài viết thành công!");
+        },
+        (err) => {
+          alert(err || "Lỗi xóa bài viết");
+        },
+      );
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("Có lỗi xảy ra khi xóa bài viết");
+    } finally {
+      setLoadingCreate(false);
+    }
+  };
 
   // Escape đóng modal
   useEffect(() => {
@@ -599,7 +669,7 @@ const handleEditPost = async () => {
             <div className="flex flex-wrap flex-1 shrink gap-4 items-center self-stretch my-auto text-white basis-6 min-w-60 max-md:max-w-full">
               <button
                 onClick={() => {
-                  setActiveTab("newest");
+                  setSearchParams({ tab: "newest" });
                   setSelectedPostId(null);
                 }}
                 className={`flex gap-2.5 justify-center items-center self-stretch p-2.5 my-auto ${
@@ -613,15 +683,15 @@ const handleEditPost = async () => {
               </button>
               <button
                 onClick={() => {
-                  setActiveTab("your-posts");
+                  setSearchParams({ tab: "my-posts" });
                   setSelectedPostId(null);
                 }}
                 className={`flex gap-2.5 justify-center items-center self-stretch p-2.5 my-auto ${
-                  activeTab === "your-posts"
+                  activeTab === "my-posts"
                     ? "font-semibold border-b-2 border-white"
                     : "font-light"
                 }`}
-                aria-current={activeTab === "your-posts" ? "page" : undefined}
+                aria-current={activeTab === "my-posts" ? "page" : undefined}
               >
                 <span className="self-stretch my-auto">Bài đăng của bạn</span>
               </button>
@@ -636,29 +706,49 @@ const handleEditPost = async () => {
             </button>
           </header>
 
-          {/* Thêm filter cho tab your-posts */}
-          {activeTab === "your-posts" && (
+          {/* Thêm filter cho tab my-posts */}
+          {activeTab === "my-posts" && (
             <div className="flex gap-4 mb-6 justify-center">
               <button
-                onClick={() => setStatusFilter("all")}
+                onClick={() =>
+                  setSearchParams({
+                    tab: "my-posts",
+                    status: "all",
+                  })
+                }
                 className={`px-4 py-2 rounded ${statusFilter === "all" ? "bg-white/20" : "bg-transparent"} text-white`}
               >
                 Tất cả
               </button>
               <button
-                onClick={() => setStatusFilter("approved")}
+                onClick={() =>
+                  setSearchParams({
+                    tab: "my-posts",
+                    status: "approved",
+                  })
+                }
                 className={`px-4 py-2 rounded ${statusFilter === "approved" ? "bg-white/20" : "bg-transparent"} text-white`}
               >
                 Đã duyệt
               </button>
               <button
-                onClick={() => setStatusFilter("pending")}
+                onClick={() =>
+                  setSearchParams({
+                    tab: "my-posts",
+                    status: "pending",
+                  })
+                }
                 className={`px-4 py-2 rounded ${statusFilter === "pending" ? "bg-white/20" : "bg-transparent"} text-white`}
               >
                 Chờ duyệt
               </button>
               <button
-                onClick={() => setStatusFilter("rejected")}
+                onClick={() =>
+                  setSearchParams({
+                    tab: "my-posts",
+                    status: "rejected",
+                  })
+                }
                 className={`px-4 py-2 rounded ${statusFilter === "rejected" ? "bg-white/20" : "bg-transparent"} text-white`}
               >
                 Từ chối
@@ -676,8 +766,7 @@ const handleEditPost = async () => {
 
           {!loading && !error && posts.length === 0 && (
             <div className="text-center py-16 text-gray-400 text-[1.25rem] max-lg:text-[14px]">
-              Chưa có bài viết nào{activeTab === "your-posts" ? " của bạn" : ""}
-              .
+              Chưa có bài viết nào{activeTab === "my-posts" ? " của bạn" : ""}.
             </div>
           )}
 
@@ -696,6 +785,7 @@ const handleEditPost = async () => {
                 }}
                 onReact={(type) => handleReact(post._id, type)}
                 onEdit={openEditModal}
+                onDelete={openDeleteConfirm}
               />
             ))}
         </div>
@@ -734,6 +824,8 @@ const handleEditPost = async () => {
                       reactions={reactions}
                       variant="modal"
                       onReact={(type) => handleReact(selectedPost._id, type)}
+                      onEdit={openEditModal}
+                      onDelete={openDeleteConfirm}
                     />
 
                     {/* Phần bình luận */}
@@ -937,7 +1029,7 @@ const handleEditPost = async () => {
                         <p className="font-medium text-white text-[1.5rem] max-lg:text-[16px]">
                           {getCurrentUser().name || "Ẩn danh"}
                         </p>
-                        <div className="flex items-center gap-1 text-sm text-white/80 bg-white/20 px-3 py-2 rounded-md">
+                        <div className="flex items-center w-fit gap-1 text-sm text-white/80 bg-white/20 px-3 py-2 rounded-md">
                           <span className="text-[1.125rem] max-lg:text-[12rem]">
                             Công khai
                           </span>
@@ -1393,6 +1485,75 @@ const handleEditPost = async () => {
                       {loadingCreate ? "Đang cập nhật..." : "Cập nhật"}
                     </button>
                   </div>
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>,
+            document.body,
+          )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm &&
+          createPortal(
+            <AnimatePresence>
+              <motion.div
+                className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 50 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 50 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* POPUP STYLE LOGIN */}
+                  <main className="relative flex overflow-hidden flex-col justify-center items-center p-10 text-[1.25rem] font-medium text-white bg-neutral-900 max-w-[607px] w-full min-h-[347px]">
+                    {cornerImages.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image.src}
+                        alt=""
+                        className={`absolute ${image.className}`}
+                      />
+                    ))}
+
+                    {/* Nút đóng */}
+                    <img
+                      src="https://cdn.builder.io/api/v1/image/assets/TEMP/8bbfb14016c67d4716e0a6366eed76fac938e5a78f6cba88c3ed041abcc52d72"
+                      className="absolute top-[20px] right-[20px] w-[20px] h-[20px] cursor-pointer"
+                      onClick={() => setShowDeleteConfirm(false)}
+                    />
+
+                    {/* ===== NỘI DUNG DELETE ===== */}
+                    <p className="text-center mt-10 text-white text-[1.5rem] max-lg:text-[16px] font-semibold">
+                      Xác nhận xóa bài viết
+                    </p>
+
+                    <p className="text-center mt-4 text-gray-300">
+                      Bạn có chắc chắn muốn xóa bài viết này? Hành động này
+                      không thể hoàn tác.
+                    </p>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-4 mt-10 w-full justify-center">
+                      <button
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white"
+                      >
+                        Hủy
+                      </button>
+
+                      <button
+                        onClick={handleDeletePost}
+                        disabled={loadingCreate}
+                        className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold disabled:opacity-50"
+                      >
+                        {loadingCreate ? "Đang xóa..." : "Xóa"}
+                      </button>
+                    </div>
+                  </main>
                 </motion.div>
               </motion.div>
             </AnimatePresence>,

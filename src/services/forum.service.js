@@ -94,27 +94,14 @@ export const createPostService = async (formData) => {
 };
 
 // [PUT] /forum/:PostID/edit
-export const updatePostService = async (PostID, data) => {
-  const formData = new FormData();
-
-  formData.append("Title", data.Title);
-  formData.append("Content", data.Content);
-
-  data.ExistingImages?.forEach((img) => formData.append("ExistingImages", img));
-
-  data.ExistingFiles?.forEach((file) => formData.append("ExistingFiles", file));
-
-  data.Images?.forEach((img) => formData.append("Images", img));
-
-  data.Files?.forEach((file) => formData.append("Files", file));
-
+export const updatePostService = async (PostID, formData) => {
   const response = await fetch(
     `${process.env.REACT_APP_API_BASE_URL}/forum/${PostID}/edit`,
     {
       method: "PUT",
       body: formData,
       credentials: "include",
-    },
+    }
   );
 
   if (!response.ok) throw new Error("Cập nhật bài viết thất bại");
