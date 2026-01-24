@@ -68,8 +68,7 @@ const ProfileForm = ({ data, setData, onSubmit }) => {
           <input
             id="phone"
             type="tel"
-            flex
-            className="-1 shrink gap-2.5 self-stretch px-[8px] py-[8px] mt-[8px] w-full text-[14px] lg:text-[1.25rem] whitespace-nowrap bg-[#EBF1F9] min-h-[40px] text-neutral-900 text-opacity-60 max-md:max-w-full"
+            className="flex-1 shrink gap-2.5 self-stretch px-[8px] py-[8px] mt-[8px] w-full text-[14px] lg:text-[1.25rem] whitespace-nowrap bg-[#EBF1F9] min-h-[40px] text-neutral-900 text-opacity-60 max-md:max-w-full"
             defaultValue=""
             readOnly
           />
@@ -91,7 +90,7 @@ const ProfileForm = ({ data, setData, onSubmit }) => {
             value={data?.currentPassword || ""}
             onChange={handleChange} // Update the state and data
             autoComplete="off"
-            className="-1 shrink gap-2.5 self-stretch px-[8px] py-[8px] mt-[8px] w-full text-[14px] lg:text-[1.25rem] whitespace-nowrap bg-[#EBF1F9] min-h-[40px] text-neutral-900 text-opacity-60 max-md:max-w-full"
+            className="flex-1 shrink gap-2.5 self-stretch px-[8px] py-[8px] mt-[8px] w-full text-[14px] lg:text-[1.25rem] whitespace-nowrap bg-[#EBF1F9] min-h-[40px] text-neutral-900 text-opacity-60 max-md:max-w-full"
           />
           {/* <img
             loading="lazy"
